@@ -15,3 +15,8 @@ VALUES 	("gosta", "Gösta Persson", "gösta123"),
 	("goran", "Göran Olsson", "goran123"),
 	("gurra", "Gustav Olofsson", "gurra123"),
 	("lisa", "Lisa Mattsson", "lisa123");
+
+INSERT INTO theaters (theater_name, capacity)
+VALUES	("Filmstaden", 127),
+	("Kino", 52),
+	("Folkets Bio i Lund Södran", 50);
