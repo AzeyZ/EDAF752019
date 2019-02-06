@@ -2,7 +2,7 @@ DROP TABLE IF EXISTS customers;
 CREATE TABLE customers(
 user_name TEXT PRIMARY KEY,
 full_name TEXT,
-password_ TEXT);
+pass_word TEXT);
 
 DROP TABLE IF EXISTS tickets;
 CREATE TABLE tickets(
@@ -12,6 +12,14 @@ movie_name TEXT REFERENCES movies(title),
 user_name TEXT REFERENCES customers(user_name),
 ticket_date DATE,
 ticket_time TIME
+);
+
+DROP TABLE IF EXISTS screenings
+CREATE TABLE performances (
+start_time TIME,
+screening_date DATE,
+movie_name TEXT REFERENCES movies(title),
+PRIMARY KEY (start_time, screening_date);
 );
 
 DROP TABLE IF EXISTS movies;
@@ -27,9 +35,6 @@ theather_name TEXT PRIMARY KEY,
 capacity INT
 );
 
-
-
-
 INSERT INTO movies (imdb_key, title, production_year, playtime)
 VALUES 	(tt0111161, "The Shawshank Redemption", 1994, 142),
 	(tt0368226, "The Room", 2003, 99),
@@ -41,7 +46,7 @@ VALUES 	(tt0111161, "The Shawshank Redemption", 1994, 142),
 	(tt1375666, "Inception", 2010, 148),
 	(tt0137523, "Fight Club", 1999, 139);
 
-INSERT INTO customers (user_name, full_name, password)
+INSERT INTO customers (user_name, full_name, pass_word)
 VALUES 	("gosta", "Gösta Persson", "gösta123"),
 	("gunnhild", "Gunnhild Svensson", "gunnhild123"),
 	("goran", "Göran Olsson", "goran123"),
