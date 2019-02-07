@@ -1,12 +1,7 @@
-DROP TABLE IF EXISTS customers;
-CREATE TABLE customers(
-user_name TEXT PRIMARY KEY,
-full_name TEXT,
-pass_word TEXT);
-
 -- Delete tables if they exist
 PRAGMA foreign_keys=OFF;
 
+DROP TABLE IF EXISTS customers;
 DROP TABLE IF EXISTS tickets;
 DROP TABLE IF EXISTS screenings;
 DROP TABLE IF EXISTS movies;
@@ -15,18 +10,23 @@ DROP TABLE IF EXISTS theaters;
 PRAGMA foreign_keys=ON;
 
 -- Create tables
+CREATE TABLE customers(
+user_name TEXT PRIMARY KEY,
+full_name TEXT,
+pass_word TEXT);
+
 CREATE TABLE tickets(
-id BLOB PRIMARY KEY,
-theater_name TEXT REFERENCES theather(theather_name),
+ticket_id BLOB PRIMARY KEY,
+theater_name TEXT REFERENCES theaters(theater_name),
 user_name TEXT REFERENCES customers(user_name)
 );
 
 CREATE TABLE screenings(
 start_time TIME,
 screening_date DATE,
-id BLOB REFERENCES tickets(id),
+ticket_id BLOB REFERENCES tickets(ticket_id),
 imdb_key TEXT REFERENCES movies(imdb_key),
-PRIMARY KEY (start_time, screening_date, theater_name)
+PRIMARY KEY (start_time, screening_date)
 );
 
 CREATE TABLE movies(
@@ -64,5 +64,5 @@ VALUES	("Filmstaden", 127),
 	("Kino", 52),
 	("Folkets Bio i Lund Södran", 50);
 
-INSERT INTO tickets (id,theater_name, user_name)
+INSERT INTO tickets (ticket_id, theater_name, user_name)
 VALUES	(lower(hex(randomblob(16))), "Filmstaden", "gosta");
