@@ -4,35 +4,43 @@ user_name TEXT PRIMARY KEY,
 full_name TEXT,
 pass_word TEXT);
 
+-- Delete tables if they exist
+PRAGMA foreign_keys=OFF;
+
 DROP TABLE IF EXISTS tickets;
+DROP TABLE IF EXISTS screenings;
+DROP TABLE IF EXISTS movies;
+DROP TABLE IF EXISTS theaters;
+
+PRAGMA foreign_keys=ON;
+
+-- Create tables
 CREATE TABLE tickets(
 id BLOB PRIMARY KEY,
 theater_name TEXT REFERENCES theather(theather_name),
 user_name TEXT REFERENCES customers(user_name)
 );
 
-DROP TABLE IF EXISTS screenings;
 CREATE TABLE screenings(
 start_time TIME,
 screening_date DATE,
 id BLOB REFERENCES tickets(id),
 imdb_key TEXT REFERENCES movies(imdb_key),
-PRIMARY KEY (start_time, screening_date)
+PRIMARY KEY (start_time, screening_date, theater_name)
 );
 
-DROP TABLE IF EXISTS movies;
 CREATE TABLE movies(
 imdb_key TEXT PRIMARY KEY,
 title TEXT,
 production_year INT,
 playtime INT);
 
-DROP TABLE IF EXISTS theaters;
 CREATE TABLE theaters(
 theater_name TEXT PRIMARY KEY,
 capacity INT
 );
 
+-- Insert data into tables
 INSERT INTO movies (imdb_key, title, production_year, playtime)
 VALUES 	("tt0111161", "The Shawshank Redemption", 1994, 142),
 	("tt0368226", "The Room", 2003, 99),
