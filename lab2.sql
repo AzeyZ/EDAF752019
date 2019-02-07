@@ -66,3 +66,6 @@ VALUES	("Filmstaden", 127),
 
 INSERT INTO tickets (id,theater_name, user_name)
 VALUES	(lower(hex(randomblob(16))), "Filmstaden", "gosta");
+
+INSERT INTO screenings(start_time, screening_date, id, imdb_key)
+VALUES ();
