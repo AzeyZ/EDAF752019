@@ -13,35 +13,70 @@ PRAGMA foreign_keys=ON;
 CREATE TABLE customers(
 user_name TEXT PRIMARY KEY,
 full_name TEXT,
-pass_word TEXT);
+pass_word TEXT
+
+-- user_name TEXT PRIMARY KEY,
+-- full_name TEXT,
+-- pass_word TEXT);
+);
 
 CREATE TABLE tickets(
-ticket_id BLOB PRIMARY KEY,
-theater_name TEXT REFERENCES theaters(theater_name),
-user_name TEXT REFERENCES customers(user_name)
+ticket_id TEXT DEFAULT (lower(hex(randomblob(16)))),
+user_name TEXT REFERENCES customers(user_name),
+screening_time,
+screening_date,
+theater_name,
+FOREIGN KEY (screening_time, screening_date, theater_name) REFERENCES screenings(screening_time, screening_date, theater_name),
+PRIMARY KEY (ticket_id)
+
+-- ticket_id TEXT DEFAULT (lower(hex(randomblob(16)))),
+-- theater_name TEXT REFERENCES theaters(theater_name),
+-- user_name TEXT REFERENCES customers(user_name),
+-- start_time TIME REFERENCES screenings(start_time),
+-- screening_date DATE REFERENCES screenings(screening_date),
+-- PRIMARY KEY (ticket_id)
 );
 
 CREATE TABLE screenings(
-start_time TIME,
+-- screening_id INT AUTO_INCREMENT,
+screening_time TIME,
 screening_date DATE,
-ticket_id BLOB REFERENCES tickets(ticket_id),
-imdb_key TEXT REFERENCES movies(imdb_key),
-PRIMARY KEY (start_time, screening_date)
+production_year INT,
+movie_name TEXT,
+theater_name TEXT REFERENCES theaters(theater_name),
+FOREIGN KEY (movie_name, production_year) REFERENCES movies (movie_name, production_year),
+PRIMARY KEY (screening_time, screening_date, theater_name)
+
+-- start_time TIME,
+-- screening_date DATE,
+-- imdb_key TEXT REFERENCES movies(imdb_key),
+-- theater_name TEXT REFERENCES theaters(theater_name),
+-- PRIMARY KEY (start_time, screening_date, imdb_key)
 );
 
 CREATE TABLE movies(
-imdb_key TEXT PRIMARY KEY,
-title TEXT,
+movie_name TEXT, 
 production_year INT,
-playtime INT);
+playtime INT,
+imdb_key TEXT,
+PRIMARY KEY (movie_name, production_year)
+
+-- imdb_key TEXT PRIMARY KEY,
+-- title TEXT,
+-- production_year INT,
+-- playtime INT);
+);
 
 CREATE TABLE theaters(
 theater_name TEXT PRIMARY KEY,
 capacity INT
+
+-- theater_name TEXT PRIMARY KEY,
+-- capacity INT
 );
 
 -- Insert data into tables
-INSERT INTO movies (imdb_key, title, production_year, playtime)
+INSERT INTO movies (imdb_key, movie_name, production_year, playtime)
 VALUES 	("tt0111161", "The Shawshank Redemption", 1994, 142),
 	("tt0368226", "The Room", 2003, 99),
 	("tt0468569", "The Dark Knight", 2008, 152),
@@ -64,8 +99,12 @@ VALUES	("Filmstaden", 127),
 	("Kino", 52),
 	("Folkets Bio i Lund Södran", 50);
 
-INSERT INTO tickets (ticket_id, theater_name, user_name)
-VALUES	(lower(hex(randomblob(16))), "Filmstaden", "gosta");
+INSERT INTO screenings (screening_time, screening_date, production_year, movie_name, theater_name)
+VALUES 	('19:00:00', '2019-02-10', 2003, "The Room", "Filmstaden"),
+	('15:00:00', '2019-02-10', 1994,"Forrest Gump", "Kino"),
+	('20:00:00', '2019-02-11', 2008,"The Dark Knight", "Filmstaden");
 
-INSERT INTO screenings(start_time, screening_date, id, imdb_key)
-VALUES ();
+INSERT INTO tickets (user_name, screening_time, screening_date, theater_name)
+VALUES	("gosta", '19:00:00', '2019-02-10', "Filmstaden"),
+	("gunnhild", '19:00:00', '2019-02-10', "Filmstaden"),
+	("gurra", '19:00:00', '2019-02-10', "Filmstaden");
