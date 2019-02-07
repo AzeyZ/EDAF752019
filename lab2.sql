@@ -6,19 +6,17 @@ pass_word TEXT);
 
 DROP TABLE IF EXISTS tickets;
 CREATE TABLE tickets(
-id TEXT PRIMARY KEY,
+id BLOB PRIMARY KEY,
 theater_name TEXT REFERENCES theather(theather_name),
-imdb_key TEXT REFERENCES movies(imdb_key),
-user_name TEXT REFERENCES customers(user_name),
-ticket_date DATE,
-ticket_time TIME
+user_name TEXT REFERENCES customers(user_name)
 );
 
 DROP TABLE IF EXISTS screenings;
 CREATE TABLE screenings(
 start_time TIME,
 screening_date DATE,
-movie_name TEXT REFERENCES movies(title),
+id BLOB REFERENCES tickets(id),
+imdb_key TEXT REFERENCES movies(imdb_key),
 PRIMARY KEY (start_time, screening_date)
 );
 
@@ -58,5 +56,5 @@ VALUES	("Filmstaden", 127),
 	("Kino", 52),
 	("Folkets Bio i Lund Södran", 50);
 
-INSERT INTO tickets (imdb_key, ticket_date)
-VALUES	("tt0368226", '2019-02-01');
+INSERT INTO tickets (id,theater_name, user_name)
+VALUES	(lower(hex(randomblob(16))), "Filmstaden", "gosta");
