@@ -9,15 +9,16 @@ public class App {
 
     void run() {
         db.openConnection("lab3.sqlite");
-        for (MovieInfo student : db.getMovieInfo("Stanford", "CS")) {
-            System.out.println(student.name + ": " + student.gpa);
+        int år = 2016;
+        for (MovieInfo movies : db.getMovieInfo("Moonlight", år, (int)111, "tt4975722")) {
+            System.out.println(movies.movie_name);
         }
-
-        System.out.println("Most popular colleges/majors");
-        for (ApplicationInfo ai : db.getApplicationInfo()) {
-            System.out.println(ai.count + ":" + ai.college + "/" + ai.major);
-        }
-
-        db.gradeFix("Stanford", 0.04);
+//
+//        System.out.println("Most popular colleges/majors");
+//        for (ApplicationInfo ai : db.getApplicationInfo()) {
+//            System.out.println(ai.count + ":" + ai.college + "/" + ai.major);
+//        }
+//
+//        db.gradeFix("Stanford", 0.04);
     }
 }
