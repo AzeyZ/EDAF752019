@@ -8,8 +8,8 @@ public class App {
     Database db = new Database();
 
     void run() {
-        db.openConnection("db.sqlite");
-        for (StudentInfo student : db.getStudentInfo("Stanford", "CS")) {
+        db.openConnection("lab3.sqlite");
+        for (MovieInfo student : db.getMovieInfo("Stanford", "CS")) {
             System.out.println(student.name + ": " + student.gpa);
         }
 
