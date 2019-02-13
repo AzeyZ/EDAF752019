@@ -63,17 +63,17 @@ public class Database {
     /* ===============================*== */
 
     public List<StudentInfo> getStudentInfo(String college, String major) {
-        var found = new LinkedList<StudentInfo>();
-        var query =
+        LinkedList<StudentInfo> found = new LinkedList<StudentInfo>();
+        String query =
             "SELECT   s_id, s_name, gpa\n" +
             "FROM     students\n" +
             "JOIN     applications\n" +
             "USING    (s_id)\n" +
             "WHERE    c_name = ? AND major = ?";
-        try (var ps = conn.prepareStatement(query)) {
+        try (PreparedStatement ps = conn.prepareStatement(query)) {
             ps.setString(1, college);
             ps.setString(2, major);
-            var rs = ps.executeQuery();
+            ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 found.add(StudentInfo.fromRS(rs));
             }
@@ -84,14 +84,14 @@ public class Database {
     }
 
     public List<ApplicationInfo> getApplicationInfo() {
-        var found = new LinkedList<ApplicationInfo>();
-        var query =
+        LinkedList<ApplicationInfo> found = new LinkedList<ApplicationInfo>();
+        String query =
             "SELECT   c_name, major, count() AS cnt\n" +
             "FROM     applications\n" +
             "GROUP BY c_name, major\n" +
             "ORDER BY cnt DESC";
-        try (var ps = conn.prepareStatement(query)) {
-            var rs = ps.executeQuery();
+        try (PreparedStatement ps = conn.prepareStatement(query)) {
+            ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 found.add(ApplicationInfo.fromRS(rs));
             }
@@ -102,7 +102,7 @@ public class Database {
     }
 
     public void gradeFix(String college, double pct) {
-        var stmt =
+        String stmt =
             "UPDATE students\n" +
             "SET    gpa = min(4, gpa * (1 + ?))\n" +
             "WHERE  s_id IN (\n" +
@@ -110,7 +110,7 @@ public class Database {
             "    FROM            applications\n" +
             "    WHERE           c_name = ?\n" +
             ")";
-        try (var ps = conn.prepareStatement(stmt)) {
+        try (PreparedStatement ps = conn.prepareStatement(stmt)) {
             ps.setDouble(1, pct);
             ps.setString(2, college);
             ps.execute();

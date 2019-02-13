@@ -9,12 +9,12 @@ public class App {
 
     void run() {
         db.openConnection("db.sqlite");
-        for (var student : db.getStudentInfo("Stanford", "CS")) {
+        for (StudentInfo student : db.getStudentInfo("Stanford", "CS")) {
             System.out.println(student.name + ": " + student.gpa);
         }
 
         System.out.println("Most popular colleges/majors");
-        for (var ai : db.getApplicationInfo()) {
+        for (ApplicationInfo ai : db.getApplicationInfo()) {
             System.out.println(ai.count + ":" + ai.college + "/" + ai.major);
         }
 
