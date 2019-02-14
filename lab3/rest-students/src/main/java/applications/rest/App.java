@@ -22,17 +22,7 @@ public class App {
         get("/ping", (req, res) -> db.getPing(res));
         post("/reset", (req, res) -> db.resetTable(req, res));
 	post("/performances", (req, res) -> db.addPerformance(req, res));
-
-//        get("/movies", (request, response)->{	
-//		    Set<String> queryParams = request.queryParams();
-//		    StringBuilder str = new StringBuilder();
-//		    str.append("Request Parameters are \n");
-//		    str.append(queryParams.size() +" length\n");
-//		    for(String param : queryParams){
-//		    	str.append(param).append(" ").append(request.queryParams(param)).append("\n");		    }
-		    
-//		    return str.toString();
-//		});
+//	post("/tickets", (req, res) -> db.newTicket(req, res));
 	get("/movies", (req, res)-> db.getMovies(req, res));
 	get("/performances", (req, res) -> db.getPerformances(req, res));
 //"application/json", (req, res) -> db.getMovies(req, res));
@@ -159,7 +149,7 @@ class Database {
 	}
 	public String resetTable(Request req, Response res) {
 
-	
+		
 		res.type("application/json");
 		
 		String query = "DELETE FROM movies";  
@@ -274,6 +264,7 @@ class Database {
 		    e.printStackTrace();
 		return "caught";
 		}
+		res.body("ok");
 		res.status(200);
 		return "OK";
 	}
@@ -323,12 +314,76 @@ public String getCustomer (Request req, Response res, String username) {
         }
         return "";
 }
+
 public String addPerformance (Request req, Response res) {
-	String user = req.queryParams("user");
-	String performance = req.queryParams("performance");
-	String pwd = req.queryParams("pwd");
-res.body("test");
-	return user + performance + pwd +"test";
+	String performanceID = "error";
+	String title = "test";
+	int capacity_new = 0;
+	int year = 666;
+	res.type("application/json");
+	String queryPerformance = 
+		"INSERT INTO screenings(screening_time, screening_date, production_year, movie_name, theater_name, remaining_seats)\n" +
+		"VALUES (?,?,?,?,?,?)";
+	String queryFind = 
+		"SELECT production_year, movie_name \n" +
+		"FROM movies\n" +
+		"WHERE imdb_key = ?";
+	String queryFindTheater =
+		"SELECT capacity\n" +
+		"FROM theaters\n" +
+		"WHERE theater_name = ?";
+
+	try (PreparedStatement ps = conn.prepareStatement(queryFind)) {
+		ps.setString(1, req.queryParams("imdb"));
+		ResultSet rs = ps.executeQuery();
+		year = rs.getInt(1);
+		title = rs.getString(2);
+	}
+	catch(SQLException e){
+		e.printStackTrace();
+	return "caught";
+	}
+	try (PreparedStatement ps = conn.prepareStatement(queryFindTheater)) {
+		ps.setString(1, req.queryParams("theater"));
+		ResultSet rs = ps.executeQuery();
+		capacity_new = rs.getInt(1);
+	}
+	catch(SQLException e){
+		e.printStackTrace();
+	return "caught";
+	}
+	// REMAININGSEATS NOT 100 NOT FIXED SPECIAL CASES
+	try (PreparedStatement ps = conn.prepareStatement(queryPerformance)) {
+		ps.setString(1, req.queryParams("time"));
+		ps.setString(2, req.queryParams("date"));
+		ps.setInt(3, year);
+		ps.setString(4, title);
+		ps.setString(5, req.queryParams("theater"));
+		ps.setInt(6, capacity_new);
+		ps.executeUpdate();
+
+		
+	}	
+	catch(SQLException e){
+		e.printStackTrace();
+	return "caught2";
+	}
+	String queryFindId = 
+		"SELECT screening_id \n" +
+		"FROM screenings\n" +
+		"WHERE theater_name = ? AND screening_date = ? AND screening_time = ?";
+		try (PreparedStatement ps2 = conn.prepareStatement(queryFindId)) {
+			ps2.setString(1, req.queryParams("theater"));
+			ps2.setString(2, req.queryParams("date"));
+			ps2.setString(3, req.queryParams("time"));
+			ResultSet rs = ps2.executeQuery();
+			performanceID = rs.getString(1);
+		}
+		catch(SQLException e){
+		e.printStackTrace();
+	return "caught3";
+	}
+		return "/performances/" + performanceID;
 }
 
 public String getPerformances (Request req, Response res) {
@@ -389,6 +444,7 @@ else{
 	}
 	return "";
 }}
+
 
 public String getOneMovie(Request req, Response res, String movieString) {
 	if(true) { return "hejsan"; }
