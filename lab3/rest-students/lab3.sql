@@ -38,11 +38,12 @@ PRIMARY KEY (ticket_id)
 );
 
 CREATE TABLE screenings(
--- screening_id INT AUTO_INCREMENT,
+screening_id TEXT DEFAULT (lower(hex(randomblob(16)))),
 screening_time TIME,
 screening_date DATE,
 production_year INT,
 movie_name TEXT,
+reamaining_seats INT,
 theater_name TEXT REFERENCES theaters(theater_name),
 FOREIGN KEY (movie_name, production_year) REFERENCES movies (movie_name, production_year),
 PRIMARY KEY (screening_time, screening_date, theater_name)
@@ -99,12 +100,12 @@ VALUES	("Filmstaden", 127),
 	("Kino", 52),
 	("Folkets Bio i Lund Södran", 50);
 
-INSERT INTO screenings (screening_time, screening_date, production_year, movie_name, theater_name)
-VALUES 	('19:00:00', '2019-02-10', 2003, "The Room", "Filmstaden"),
-	('15:00:00', '2019-02-10', 1994,"Forrest Gump", "Kino"),
-	('20:00:00', '2019-02-11', 2008,"The Dark Knight", "Filmstaden");
+--INSERT INTO screenings (screening_time, screening_date, production_year, movie_name, theater_name)
+--VALUES 	('19:00:00', '2019-02-10', 2003, "The Room", "Filmstaden"),
+--	('15:00:00', '2019-02-10', 1994,"Forrest Gump", "Kino"),
+--	('20:00:00', '2019-02-11', 2008,"The Dark Knight", "Filmstaden");
 
-INSERT INTO tickets (user_name, screening_time, screening_date, theater_name)
-VALUES	("gosta", '19:00:00', '2019-02-10', "Filmstaden"),
-	("gunnhild", '19:00:00', '2019-02-10', "Filmstaden"),
-	("gurra", '19:00:00', '2019-02-10', "Filmstaden");
+--INSERT INTO tickets (user_name, screening_time, screening_date, theater_name)
+--VALUES	("gosta", '19:00:00', '2019-02-10', "Filmstaden"),
+--	("gunnhild", '19:00:00', '2019-02-10', "Filmstaden"),
+--	("gurra", '19:00:00', '2019-02-10', "Filmstaden");
