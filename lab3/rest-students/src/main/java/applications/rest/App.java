@@ -22,7 +22,7 @@ public class App {
         get("/ping", (req, res) -> db.getPing(res));
         post("/reset", (req, res) -> db.resetTable(req, res));
 	post("/performances", (req, res) -> db.addPerformance(req, res));
-//	post("/tickets", (req, res) -> db.newTicket(req, res));
+	post("/tickets", (req, res) -> db.addTicket(req, res));
 	get("/movies", (req, res)-> db.getMovies(req, res));
 	get("/performances", (req, res) -> db.getPerformances(req, res));
 //"application/json", (req, res) -> db.getMovies(req, res));
@@ -314,7 +314,76 @@ public String getCustomer (Request req, Response res, String username) {
         }
         return "";
 }
+public String addTicket (Request req, Response res){
+	int remaining_seats = 0;
+	String screening_time = "";
+	String screening_date = "";
+	String theater_name  = "";
+	String queryFindRemaningSeats =
+	"SELECT remaining_seats, screening_time, screening_date, theater_name\n" +
+	"FROM screenings\n" +
+	"WHERE screening_id = ?";
+	try(PreparedStatement ps = conn.prepareStatement(queryFindRemaningSeats)){
+		ps.setString(1, req.queryParams("performance"));
+		ResultSet rs = ps.executeQuery();
+		remaining_seats = rs.getInt(1);
+		screening_time = rs.getString(2);
+		screening_date = rs.getString(3);
+		theater_name = rs.getString(4);
+	}catch(SQLException e){
+		e.printStackTrace();
+		return "Error";
+	}
+	if(remaining_seats <= 0)
+	{
+		return "No tickets left";
+	}
+	String queryPassword =
+	"SELECT user_name, pass_word\n" +
+	"FROM customers\n" +
+	"WHERE user_name = ? AND pass_word = ?";
+	try(PreparedStatement ps = conn.prepareStatement(queryPassword)){
+		ps.setString(1, req.queryParams("user"));
+		ps.setString(2, passGen.hash(req.queryParams("pwd")));
+		ResultSet rs = ps.executeQuery();	
+	}catch(SQLException e){
+		e.printStackTrace();
+		return "Wrong password";
+	}
+	String queryTicket =
+	"INSERT INTO tickets (user_name, screening_time, screening_date, theater_name)\n" +
+		"VALUES  (?, ?, ?, ?)\n";
 
+	try (PreparedStatement ps = conn.prepareStatement(queryTicket)) {
+            ps.setString(1, req.queryParams("user"));
+			ps.setString(2, screening_time);
+			ps.setString(3, screening_date);
+			ps.setString(4, theater_name);
+			ps.executeUpdate();
+	}
+	catch(SQLException e){
+		e.printStackTrace();
+		return "Error";
+	}
+
+
+	String queryUpdate =
+	"UPDATE screenings \n" + 
+	"SET remaining_seats = ?\n" + 
+	"WHERE screening_id = ?";
+
+	 try (PreparedStatement ps = conn.prepareStatement(queryUpdate)) {
+		 	remaining_seats --;
+            ps.setInt(1, remaining_seats);
+			ps.setString(2, req.queryParams("performance"));
+			ps.executeUpdate();
+	}
+	catch(SQLException e){
+		e.printStackTrace();
+		return "ErrorInsert";
+	}
+	return "done" + remaining_seats;
+}
 public String addPerformance (Request req, Response res) {
 	String performanceID = "error";
 	String title = "test";
