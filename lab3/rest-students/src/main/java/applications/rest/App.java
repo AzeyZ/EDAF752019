@@ -21,14 +21,13 @@ public class App {
 
         get("/ping", (req, res) -> db.getPing(res));
         post("/reset", (req, res) -> db.resetTable(req, res));
-<<<<<<< HEAD
+
         get("/movies", (req, res) -> db.getMovies(req, res));
 	get("/performances", (req, res) -> db.getPerformances(req, res));
-=======
+
 	get("/movies/movies?title=Spotlight&year=2015" , (req, res) -> db.getOneMovie(req, res, req.params("LMAO")));
-       	// get("/movies", (req, res) -> db.getMovies(req, res));
-	 
->>>>>>> a5b1e4819a179075cccce62e168174df5a68eb3e
+
+
     }
 }
 
@@ -150,14 +149,9 @@ class Database {
 	}
 	public String resetTable(Request req, Response res) {
 
-<<<<<<< HEAD
-	
 		res.type("application/json");
 		String query = "DELETE FROM movies";  
-=======
-	res.type("application/json");
-	String query = "DELETE FROM movies";  
->>>>>>> a5b1e4819a179075cccce62e168174df5a68eb3e
+
 
 		 try (PreparedStatement ps = conn.prepareStatement(query)) {
 			ps.executeUpdate();
@@ -310,10 +304,6 @@ try (PreparedStatement ps = conn.prepareStatement(query)) {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-<<<<<<< HEAD
-        return "";
-}	
-=======
 	return "OK \n";
 }
 public String getMovies(Request req, Response res){
@@ -369,7 +359,7 @@ public String getOneMovie(Request req, Response res, String movieString) {
 	return "";
 }
 	
->>>>>>> a5b1e4819a179075cccce62e168174df5a68eb3e
+
 }
 
 /*
