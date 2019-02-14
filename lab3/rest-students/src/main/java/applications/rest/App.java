@@ -335,15 +335,10 @@ public String getPerformances (Request req, Response res) {
 
 res.type("application/json");
 String query = 
-	"SELECT *\n" + 
-	"FROM screenings";
+	"SELECT *\n" +
+	"FROM screenings\n";
 
 try (PreparedStatement ps = conn.prepareStatement(query)) {
-            // int index = 0;
-            // for (String param : params) {
-                // ps.setString(++index, param);
-            // }
-            
 	ResultSet rs = ps.executeQuery();
         String result = JSONizer.toJSON(rs, "data");
         res.status(200);

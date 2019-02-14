@@ -43,7 +43,7 @@ screening_time TIME,
 screening_date DATE,
 production_year INT,
 movie_name TEXT,
-reamaining_seats INT,
+remaining_seats INT,
 theater_name TEXT REFERENCES theaters(theater_name),
 FOREIGN KEY (movie_name, production_year) REFERENCES movies (movie_name, production_year),
 PRIMARY KEY (screening_time, screening_date, theater_name)
