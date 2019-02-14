@@ -23,6 +23,7 @@ public class App {
         get("/ping", (req, res) -> db.getPing(res));
         post("/reset", (req, res) -> db.resetTable(req, res));
         get("/movies", (req, res) -> db.getMovies(req, res));
+	get("/performances", (req, res) -> db.getPerformances(req, res));
     }
 }
 
@@ -136,146 +137,170 @@ class Database {
 //		}
 //	}
 
-public String getPing(Response res) {
-	//res.type("application/json");
-	res.status(200);
-	//res.body("pong\n");
-	return "pong\n";
-}
-public String resetTable(Request req, Response res) {
+	public String getPing(Response res) {
+		//res.type("application/json");
+		res.status(200);
+		//res.body("pong\n");
+		return "pong\n";
+	}
+	public String resetTable(Request req, Response res) {
 
 	
-	res.type("application/json");
-	String query = "DELETE FROM movies";  
+		res.type("application/json");
+		String query = "DELETE FROM movies";  
 
-	 try (PreparedStatement ps = conn.prepareStatement(query)) {
-		ps.executeUpdate();
+		 try (PreparedStatement ps = conn.prepareStatement(query)) {
+			ps.executeUpdate();
 
-        } catch (SQLException e) {
-            e.printStackTrace();
-	return "caught";
-        }
+		} catch (SQLException e) {
+		    e.printStackTrace();
+		return "caught";
+		}
 	
 
-	query = "DELETE FROM customers";
-	try (PreparedStatement ps = conn.prepareStatement(query)) {
-		ps.executeUpdate();
+		query = "DELETE FROM customers";
+		try (PreparedStatement ps = conn.prepareStatement(query)) {
+			ps.executeUpdate();
 
-        } catch (SQLException e) {
-            e.printStackTrace();
-	return "caught";
-        }
+		} catch (SQLException e) {
+		    e.printStackTrace();
+		return "caught";
+		}
 	
 	
-	query = "DELETE FROM theaters";
+		query = "DELETE FROM theaters";
 
-	try (PreparedStatement ps = conn.prepareStatement(query)) {
-		ps.executeUpdate();
+		try (PreparedStatement ps = conn.prepareStatement(query)) {
+			ps.executeUpdate();
 
-        } catch (SQLException e) {
-            e.printStackTrace();
-	return "caught";
-        }
+		} catch (SQLException e) {
+		    e.printStackTrace();
+		return "caught";
+		}
 
-	query = "DELETE FROM tickets";
+		query = "DELETE FROM tickets";
 
-	try (PreparedStatement ps = conn.prepareStatement(query)) {
-		ps.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-	return "caught";
-        }
+		try (PreparedStatement ps = conn.prepareStatement(query)) {
+			ps.executeUpdate();
+		} catch (SQLException e) {
+		    e.printStackTrace();
+		return "caught";
+		}
 
-	query = "DELETE FROM screenings";
+		query = "DELETE FROM screenings";
 
-	try (PreparedStatement ps = conn.prepareStatement(query)) {
-		ps.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-	return "caught";
-        }
+		try (PreparedStatement ps = conn.prepareStatement(query)) {
+			ps.executeUpdate();
+		} catch (SQLException e) {
+		    e.printStackTrace();
+		return "caught";
+		}
 	
 
-	String queryCustomers =
-	"INSERT INTO customers (user_name, full_name, pass_word)\n" +
-        "VALUES  (?, ?, ?)\n";
-	String queryMovies =
-	"INSERT INTO movies(imdb_key, movie_name, production_year, playtime)\n" +
-	"VALUES (?,?,?,?)";
-	String queryTheaters = 
-	"INSERT INTO theaters(theater_name, capacity)\n" +
-	"VALUES (?,?)";
+		String queryCustomers =
+		"INSERT INTO customers (user_name, full_name, pass_word)\n" +
+		"VALUES  (?, ?, ?)\n";
+		String queryMovies =
+		"INSERT INTO movies(imdb_key, movie_name, production_year, playtime)\n" +
+		"VALUES (?,?,?,?)";
+		String queryTheaters = 
+		"INSERT INTO theaters(theater_name, capacity)\n" +
+		"VALUES (?,?)";
 
-        try{
-	PreparedStatement cust = conn.prepareStatement(queryCustomers);
-	PreparedStatement cust1 = conn.prepareStatement(queryCustomers);
-	PreparedStatement movie = conn.prepareStatement(queryMovies);
-	PreparedStatement movie1 = conn.prepareStatement(queryMovies);
-	PreparedStatement movie2 = conn.prepareStatement(queryMovies);
-	PreparedStatement movie3 = conn.prepareStatement(queryMovies);
-	PreparedStatement theater = conn.prepareStatement(queryTheaters);
-	PreparedStatement theater1 = conn.prepareStatement(queryTheaters);
-	PreparedStatement theater2 = conn.prepareStatement(queryTheaters);
-        cust.setString(1, "alice");
-        cust.setString(2, "Alice");
-        cust.setString(3, passGen.hash("dobido"));
-	cust.executeUpdate();
-	cust1.setString(1, "bob");
-	cust1.setString(2, "Bob");
-	cust1.setString(3, passGen.hash("whatsinaname"));
-	cust1.executeUpdate();
-	movie.setString(1, "tt5580390");
-	movie.setString(2, "The Shape of Water");
-	movie.setInt(3, 2017);
-	movie.setInt(4, 135);
-	movie.executeUpdate();
-	movie1.setString(1, "tt4975722");
-	movie1.setString(2, "Moonlight");
-	movie1.setInt(3, 2016);
-	movie1.setInt(4, 111);
-	movie1.executeUpdate();
-	movie2.setString(1, "tt1895587");
-	movie2.setString(2, "Spotlight");
-	movie2.setInt(3, 2015);
-	movie2.setInt(4, 135);
-	movie2.executeUpdate();
-	movie3.setString(1, "tt2562232");
-	movie3.setString(2, "Birdman");
-	movie3.setInt(3, 2014);
-	movie3.setInt(4, 132);
-	movie3.executeUpdate();
-	theater.setString(1, "Kino");
-	theater.setInt(2, 10);
-	theater.executeUpdate();
-	theater1.setString(1, "Södran");
-	theater1.setInt(2, 16);
-	theater1.executeUpdate();
-	theater2.setString(1, "Skandia");
-	theater2.setInt(2, 100);
-	theater2.executeUpdate();
+		try{
+		PreparedStatement cust = conn.prepareStatement(queryCustomers);
+		PreparedStatement cust1 = conn.prepareStatement(queryCustomers);
+		PreparedStatement movie = conn.prepareStatement(queryMovies);
+		PreparedStatement movie1 = conn.prepareStatement(queryMovies);
+		PreparedStatement movie2 = conn.prepareStatement(queryMovies);
+		PreparedStatement movie3 = conn.prepareStatement(queryMovies);
+		PreparedStatement theater = conn.prepareStatement(queryTheaters);
+		PreparedStatement theater1 = conn.prepareStatement(queryTheaters);
+		PreparedStatement theater2 = conn.prepareStatement(queryTheaters);
+		cust.setString(1, "alice");
+		cust.setString(2, "Alice");
+		cust.setString(3, passGen.hash("dobido"));
+		cust.executeUpdate();
+		cust1.setString(1, "bob");
+		cust1.setString(2, "Bob");
+		cust1.setString(3, passGen.hash("whatsinaname"));
+		cust1.executeUpdate();
+		movie.setString(1, "tt5580390");
+		movie.setString(2, "The Shape of Water");
+		movie.setInt(3, 2017);
+		movie.setInt(4, 135);
+		movie.executeUpdate();
+		movie1.setString(1, "tt4975722");
+		movie1.setString(2, "Moonlight");
+		movie1.setInt(3, 2016);
+		movie1.setInt(4, 111);
+		movie1.executeUpdate();
+		movie2.setString(1, "tt1895587");
+		movie2.setString(2, "Spotlight");
+		movie2.setInt(3, 2015);
+		movie2.setInt(4, 135);
+		movie2.executeUpdate();
+		movie3.setString(1, "tt2562232");
+		movie3.setString(2, "Birdman");
+		movie3.setInt(3, 2014);
+		movie3.setInt(4, 132);
+		movie3.executeUpdate();
+		theater.setString(1, "Kino");
+		theater.setInt(2, 10);
+		theater.executeUpdate();
+		theater1.setString(1, "Södran");
+		theater1.setInt(2, 16);
+		theater1.executeUpdate();
+		theater2.setString(1, "Skandia");
+		theater2.setInt(2, 100);
+		theater2.executeUpdate();
 	
-        } catch (SQLException e) {
-            e.printStackTrace();
-	return "caught";
-        }
-	return "OK";
-}
-public String getMovies(Request req, Response res){
-	res.type("application/json");
-	String query = "SELECT imdb_key AS imdbKey, movie_name AS title, production_year AS year \n" +
-	"FROM movies \n";
-	try{
-	PreparedStatement ps = conn.prepareStatement(query);
+		} catch (SQLException e) {
+		    e.printStackTrace();
+		return "caught";
+		}
+		return "OK";
+	}
+	public String getMovies(Request req, Response res){
+		res.type("application/json");
+		String query = "SELECT imdb_key AS imdbKey, movie_name AS title, production_year AS year \n" +
+		"FROM movies \n";
+		try{
+		PreparedStatement ps = conn.prepareStatement(query);
+		ResultSet rs = ps.executeQuery();
+		String result = JSONizer.toJSON(rs, "data");
+		res.status(200);
+		res.body(result);
+		return result;
+	
+	}catch(SQLException e){
+	e.printStackTrace();
+	}
+	return "";
+	}
+
+public String getPerformances (Request req, Response res) {
+
+res.type("application/json");
+String query = 
+	"SELECT *\n" + 
+	"FROM screenings";
+
+try (PreparedStatement ps = conn.prepareStatement(query)) {
+            // int index = 0;
+            // for (String param : params) {
+                // ps.setString(++index, param);
+            // }
+            
 	ResultSet rs = ps.executeQuery();
-	String result = JSONizer.toJSON(rs, "data");
-	res.status(200);
-	res.body(result);
-	return result;
-	
-}catch(SQLException e){
-e.printStackTrace();
-}
-return "";
+        String result = JSONizer.toJSON(rs, "data");
+        res.status(200);
+        res.body(result);
+        return result;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return "";
 }	
 }
 
