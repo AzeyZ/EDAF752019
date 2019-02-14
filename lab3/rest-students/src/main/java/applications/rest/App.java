@@ -22,10 +22,19 @@ public class App {
         get("/ping", (req, res) -> db.getPing(res));
         post("/reset", (req, res) -> db.resetTable(req, res));
 
-        get("/movies", (req, res) -> db.getMovies(req, res));
+//        get("/movies", (request, response)->{	
+//		    Set<String> queryParams = request.queryParams();
+//		    StringBuilder str = new StringBuilder();
+//		    str.append("Request Parameters are \n");
+//		    str.append(queryParams.size() +" length\n");
+//		    for(String param : queryParams){
+//		    	str.append(param).append(" ").append(request.queryParams(param)).append("\n");		    }
+		    
+//		    return str.toString();
+//		});
+	get("/movies", (req, res)-> db.getMovies(req, res));
 	get("/performances", (req, res) -> db.getPerformances(req, res));
-
-	get("/movies/movies?title=Spotlight&year=2015" , (req, res) -> db.getOneMovie(req, res, req.params("LMAO")));
+//"application/json", (req, res) -> db.getMovies(req, res));
 
 
     }
@@ -150,6 +159,7 @@ class Database {
 	public String resetTable(Request req, Response res) {
 
 		res.type("application/json");
+		
 		String query = "DELETE FROM movies";  
 
 
@@ -263,24 +273,8 @@ class Database {
 		    e.printStackTrace();
 		return "caught";
 		}
-		return "OK";
-	}
-	public String getMovies(Request req, Response res){
-		res.type("application/json");
-		String query = "SELECT imdb_key AS imdbKey, movie_name AS title, production_year AS year \n" +
-		"FROM movies \n";
-		try{
-		PreparedStatement ps = conn.prepareStatement(query);
-		ResultSet rs = ps.executeQuery();
-		String result = JSONizer.toJSON(rs, "data");
 		res.status(200);
-		res.body(result);
-		return result;
-	
-	}catch(SQLException e){
-	e.printStackTrace();
-	}
-	return "";
+		return "OK";
 	}
 
 public String getPerformances (Request req, Response res) {
@@ -307,6 +301,29 @@ try (PreparedStatement ps = conn.prepareStatement(query)) {
 	return "OK \n";
 }
 public String getMovies(Request req, Response res){
+	if(true){	
+			String title = req.queryParams("title");
+			int year = Integer.parseInt(req.queryParams("year"));
+			String query = "SELECT imdb_key AS imdbKey, movie_name AS title, production_year AS year \n" +			"FROM movies \n" +
+			"WHERE movie_name = ? AND production_year = ? \n";
+			
+		try (PreparedStatement ps = conn.prepareStatement(query)) {
+
+		ps.setString(1, title);
+		ps.setInt(2, year);
+		ResultSet rs = ps.executeQuery();
+		String result = JSONizer.toJSON(rs, "data");
+		res.status(200);
+		res.body(result);
+		return result;
+		}
+	catch (SQLException e) {
+	e.printStackTrace();
+	return query;
+
+	}
+	}
+else{
 	res.type("application/json");
 	String query = "SELECT imdb_key AS imdbKey, movie_name AS title, production_year AS year \n" +
 	"FROM movies \n";
@@ -322,7 +339,7 @@ public String getMovies(Request req, Response res){
 	e.printStackTrace();
 	}
 	return "";
-}
+}}
 
 public String getOneMovie(Request req, Response res, String movieString) {
 	if(true) { return "hejsan"; }
@@ -335,7 +352,7 @@ public String getOneMovie(Request req, Response res, String movieString) {
 		String[] partsYear = year.split("=");
 		int yearInt = Integer.parseInt(partsYear[1]);
 		query = "SELECT imdb_key AS imdbKey, movie_name AS title, production_year AS year \n" +			"FROM movies \n" +
-			"WHERE movie_name = ? AND prduction_year = ? \n";
+			"WHERE movie_name = ? AND production_year = ? \n";
 	try {
 	PreparedStatement ps = conn.prepareStatement(query);
 	ps.setString(1, title);
