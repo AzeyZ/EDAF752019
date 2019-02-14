@@ -21,13 +21,10 @@ public class App {
 
         get("/ping", (req, res) -> db.getPing(res));
         post("/reset", (req, res) -> db.resetTable(req, res));
-
         get("/movies", (req, res) -> db.getMovies(req, res));
-	get("/performances", (req, res) -> db.getPerformances(req, res));
-
-	get("/movies/movies?title=Spotlight&year=2015" , (req, res) -> db.getOneMovie(req, res, req.params("LMAO")));
-
-
+		get("/movies/:imdb-key", (req, res) -> db.getMovie(req, res, req.params(":imdb-key")));
+		get("/performances", (req, res) -> db.getPerformances(req, res));
+		get("/customers/:username/tickets", (req, res) -> db.getCustomer(req, res, req.params(":username")));
     }
 }
 
@@ -149,9 +146,9 @@ class Database {
 	}
 	public String resetTable(Request req, Response res) {
 
+	
 		res.type("application/json");
 		String query = "DELETE FROM movies";  
-
 
 		 try (PreparedStatement ps = conn.prepareStatement(query)) {
 			ps.executeUpdate();
@@ -283,6 +280,51 @@ class Database {
 	return "";
 	}
 
+public String getMovie (Request req, Response res, String imdb_key) {
+	res.type("aaplication/json");
+	String query = 
+		"SELECT imdb_key AS imdbKey, movie_name AS name, production_year AS year\n" + 
+		"FROM movies\n" +
+		"WHERE imdbKey = ?\n";
+
+	try (PreparedStatement ps = conn.prepareStatement(query)) {
+        ps.setString(1, imdb_key);
+    	ResultSet rs = ps.executeQuery();
+        String result = JSONizer.toJSON(rs, "data");
+        res.status(200);
+        res.body(result);
+        return result;
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    
+	return "";
+}
+
+public String getCustomer (Request req, Response res, String username) {
+	res.type("application/json");
+	String query = 
+		"SELECT screening_date AS date, screening_time AS time," + 
+			"theater_name AS theater, movie_name AS title," + 
+			"production_year AS year, count() AS nbrOfTickets\n" +
+		"FROM tickets\n" +
+		"JOIN screenings\n" +
+		"USING (screening_date, screening_time, theater_name)\n" +
+		"WHERE user_name = ?\n";
+
+	try (PreparedStatement ps = conn.prepareStatement(query)) {
+            ps.setString(1, username);
+            ResultSet rs = ps.executeQuery();
+            String result = JSONizer.toJSON(rs, "data");
+            res.status(200);
+            res.body(result);
+            return result;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return "";
+}
+
 public String getPerformances (Request req, Response res) {
 
 res.type("application/json");
@@ -304,62 +346,8 @@ try (PreparedStatement ps = conn.prepareStatement(query)) {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-	return "OK \n";
-}
-public String getMovies(Request req, Response res){
-	res.type("application/json");
-	String query = "SELECT imdb_key AS imdbKey, movie_name AS title, production_year AS year \n" +
-	"FROM movies \n";
-	try{
-	PreparedStatement ps = conn.prepareStatement(query);
-	ResultSet rs = ps.executeQuery();
-	String result = JSONizer.toJSON(rs, "data");
-	res.status(200);
-	res.body(result);
-	return result;
-	
-	}catch(SQLException e){
-	e.printStackTrace();
-	}
-	return "";
-}
-
-public String getOneMovie(Request req, Response res, String movieString) {
-	if(true) { return "hejsan"; }
-	String query = "";
-	res.type("application/json");
-	if(movieString.indexOf('&') >= 0) {
-		String[] parts = movieString.split("&");
-		String title = parts[0];
-		String year = parts[1];
-		String[] partsYear = year.split("=");
-		int yearInt = Integer.parseInt(partsYear[1]);
-		query = "SELECT imdb_key AS imdbKey, movie_name AS title, production_year AS year \n" +			"FROM movies \n" +
-			"WHERE movie_name = ? AND prduction_year = ? \n";
-	try {
-	PreparedStatement ps = conn.prepareStatement(query);
-	ps.setString(1, title);
-	ps.setInt(2, yearInt);
-	ResultSet rs = ps.executeQuery();
-	String result = JSONizer.toJSON(rs, "data");
-	res.status(200);
-	res.body(result);
-	return "HEJSAN";
-//	return result;
-	}
-	catch (SQLException e) {
-	e.printStackTrace();
-	return "caught";
-	}
-	} else {
-	
-	}
-	
-	
-	return "";
-}
-	
-
+        return "";
+	}	
 }
 
 /*
