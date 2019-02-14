@@ -19,10 +19,11 @@ public class App {
         Database db = new Database("movies.db");
         port(7007);
 
-      //  before("/*", (req, res) -> appl.log(req.splat()[0]));
         get("/ping", (req, res) -> db.getPing(res));
         post("/reset", (req, res) -> db.resetTable(req, res));
-        get("/movies", (req, res) -> db.getMovies(req, res));
+	get("/movies/movies?title=Spotlight&year=2015" , (req, res) -> db.getOneMovie(req, res, req.params("LMAO")));
+       	// get("/movies", (req, res) -> db.getMovies(req, res));
+	 
     }
 }
 
@@ -144,7 +145,6 @@ public String getPing(Response res) {
 }
 public String resetTable(Request req, Response res) {
 
-	
 	res.type("application/json");
 	String query = "DELETE FROM movies";  
 
@@ -258,7 +258,7 @@ public String resetTable(Request req, Response res) {
             e.printStackTrace();
 	return "caught";
         }
-	return "OK";
+	return "OK \n";
 }
 public String getMovies(Request req, Response res){
 	res.type("application/json");
@@ -272,11 +272,47 @@ public String getMovies(Request req, Response res){
 	res.body(result);
 	return result;
 	
-}catch(SQLException e){
-e.printStackTrace();
+	}catch(SQLException e){
+	e.printStackTrace();
+	}
+	return "";
 }
-return "";
-}	
+
+public String getOneMovie(Request req, Response res, String movieString) {
+	if(true) { return "hejsan"; }
+	String query = "";
+	res.type("application/json");
+	if(movieString.indexOf('&') >= 0) {
+		String[] parts = movieString.split("&");
+		String title = parts[0];
+		String year = parts[1];
+		String[] partsYear = year.split("=");
+		int yearInt = Integer.parseInt(partsYear[1]);
+		query = "SELECT imdb_key AS imdbKey, movie_name AS title, production_year AS year \n" +			"FROM movies \n" +
+			"WHERE movie_name = ? AND prduction_year = ? \n";
+	try {
+	PreparedStatement ps = conn.prepareStatement(query);
+	ps.setString(1, title);
+	ps.setInt(2, yearInt);
+	ResultSet rs = ps.executeQuery();
+	String result = JSONizer.toJSON(rs, "data");
+	res.status(200);
+	res.body(result);
+	return "HEJSAN";
+//	return result;
+	}
+	catch (SQLException e) {
+	e.printStackTrace();
+	return "caught";
+	}
+	} else {
+	
+	}
+	
+	
+	return "";
+}
+	
 }
 
 /*
@@ -374,7 +410,6 @@ class MovieInfo {
 	public final String imdb_key;
 
 	public MovieInfo(String movie_name, int year, int playtime, String imdb_key) {
-		super();
 		this.movie_name = movie_name;
 		this.production_year = year;
 		this.playtime = playtime;
