@@ -322,7 +322,7 @@ public String addPerformance (Request req, Response res) {
 	int year = 666;
 	res.type("application/json");
 	String queryPerformance = 
-		"INSERT INTO screenings(screening_time, screening_date, production_year, movie_name, theater_name, remaining_seats)\n" +
+		"INSERT INTO screenings (screening_time, screening_date, production_year, movie_name, theater_name, remaining_seats)\n" +
 		"VALUES (?,?,?,?,?,?)";
 	String queryFind = 
 		"SELECT production_year, movie_name \n" +
@@ -341,7 +341,7 @@ public String addPerformance (Request req, Response res) {
 	}
 	catch(SQLException e){
 		e.printStackTrace();
-	return "caught";
+	return "No such movie or theater";
 	}
 	try (PreparedStatement ps = conn.prepareStatement(queryFindTheater)) {
 		ps.setString(1, req.queryParams("theater"));
@@ -350,9 +350,9 @@ public String addPerformance (Request req, Response res) {
 	}
 	catch(SQLException e){
 		e.printStackTrace();
-	return "caught";
+	return "No such movie or theater";
 	}
-	// REMAININGSEATS NOT 100 NOT FIXED SPECIAL CASES
+	
 	try (PreparedStatement ps = conn.prepareStatement(queryPerformance)) {
 		ps.setString(1, req.queryParams("time"));
 		ps.setString(2, req.queryParams("date"));
@@ -361,12 +361,10 @@ public String addPerformance (Request req, Response res) {
 		ps.setString(5, req.queryParams("theater"));
 		ps.setInt(6, capacity_new);
 		ps.executeUpdate();
-
-		
 	}	
 	catch(SQLException e){
 		e.printStackTrace();
-	return "caught2";
+	return "#369_multiple_error?";
 	}
 	String queryFindId = 
 		"SELECT screening_id \n" +
@@ -404,8 +402,9 @@ try (PreparedStatement ps = conn.prepareStatement(query)) {
         }
 	return "OK \n";
 }
+
 public String getMovies(Request req, Response res){
-	if(true){	
+	if(req.queryParams().size() == 2){	
 			String title = req.queryParams("title");
 			int year = Integer.parseInt(req.queryParams("year"));
 			String query = "SELECT imdb_key AS imdbKey, movie_name AS title, production_year AS year \n" +			"FROM movies \n" +
