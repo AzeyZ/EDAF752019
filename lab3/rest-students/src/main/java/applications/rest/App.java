@@ -308,7 +308,8 @@ public String getCustomer (Request req, Response res, String username) {
 		"FROM tickets\n" +
 		"JOIN screenings\n" +
 		"USING (screening_date, screening_time, theater_name)\n" +
-		"WHERE user_name = ?\n";
+		"WHERE user_name = ?\n" + 
+		"GROUP BY screening_id\n";
 
 	try (PreparedStatement ps = conn.prepareStatement(query)) {
             ps.setString(1, username);
