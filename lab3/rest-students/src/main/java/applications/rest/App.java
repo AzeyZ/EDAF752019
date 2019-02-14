@@ -21,6 +21,7 @@ public class App {
 
         get("/ping", (req, res) -> db.getPing(res));
         post("/reset", (req, res) -> db.resetTable(req, res));
+	post("/performances", (req, res) -> db.addPerformance(req, res));
 
 //        get("/movies", (request, response)->{	
 //		    Set<String> queryParams = request.queryParams();
@@ -320,6 +321,13 @@ public String getCustomer (Request req, Response res, String username) {
             e.printStackTrace();
         }
         return "";
+}
+public String addPerformance (Request req, Response res) {
+	String user = req.queryParams("user");
+	String performance = req.queryParams("performance");
+	String pwd = req.queryParams("pwd");
+res.body("test");
+	return user + performance + pwd +"test";
 }
 
 public String getPerformances (Request req, Response res) {
