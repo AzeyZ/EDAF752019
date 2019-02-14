@@ -319,6 +319,7 @@ public String addTicket (Request req, Response res){
 	String screening_time = "";
 	String screening_date = "";
 	String theater_name  = "";
+	String ticketID = "tes";
 	String queryFindRemaningSeats =
 	"SELECT remaining_seats, screening_time, screening_date, theater_name\n" +
 	"FROM screenings\n" +
@@ -382,7 +383,23 @@ public String addTicket (Request req, Response res){
 		e.printStackTrace();
 		return "ErrorInsert";
 	}
-	return "done" + remaining_seats;
+	String queryFindId = 
+		"SELECT ticket_id\n" + 
+		"FROM tickets\n" +
+		"WHERE rowid = last_insert_rowid()";
+		try (PreparedStatement ps2 = conn.prepareStatement(queryFindId)) {
+			//ps2.setString(1, req.queryParams("theater"));
+			//ps2.setString(2, req.queryParams("date"));
+			//ps2.setString(3, req.queryParams("time"));
+			ResultSet rs = ps2.executeQuery();
+			ticketID = rs.getString(1);
+		}
+		catch(SQLException e){
+		e.printStackTrace();
+	return "caught3";
+	}
+		return "/ticket/" + ticketID;
+
 }
 public String addPerformance (Request req, Response res) {
 	String performanceID = "error";
