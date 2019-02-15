@@ -21,13 +21,12 @@ public class App {
 
         get("/ping", (req, res) -> db.getPing(res));
         post("/reset", (req, res) -> db.resetTable(req, res));
-	post("/performances", (req, res) -> db.addPerformance(req, res));
-	post("/tickets", (req, res) -> db.addTicket(req, res));
-	get("/movies", (req, res)-> db.getMovies(req, res));
-	get("/performances", (req, res) -> db.getPerformances(req, res));
-//"application/json", (req, res) -> db.getMovies(req, res));
-	get("/movies/:imdb-key", (req, res) -> db.getMovie(req, res, req.params(":imdb-key")));
-	get("/customers/:username/tickets", (req, res) -> db.getCustomer(req, res, req.params(":username")));
+		post("/performances", (req, res) -> db.addPerformance(req, res));
+		post("/tickets", (req, res) -> db.addTicket(req, res));
+		get("/movies", (req, res)-> db.getMovies(req, res));
+		get("/performances", (req, res) -> db.getPerformances(req, res));
+		get("/movies/:imdb-key", (req, res) -> db.getMovie(req, res, req.params(":imdb-key")));
+		get("/customers/:username/tickets", (req, res) -> db.getCustomer(req, res, req.params(":username")));
     }
 }
 
@@ -93,58 +92,11 @@ class Database {
 	/* --- insert your own code below --- */
 	/* ===============================*== */
 
-	public List<MovieInfo> getMovieInfo(String movie_name, int production_year, int playtime, String imdb_key) {
-		LinkedList<MovieInfo> found = new LinkedList<MovieInfo>();
-		String query = 
-		"SELECT   *\n" + 
-		"FROM     movies\n";
-		try (PreparedStatement ps = conn.prepareStatement(query)) {
-			ps.setString(1, movie_name);
-			ps.setInt(2, production_year);
-			ps.setInt(3, playtime);
-			ps.setString(4, imdb_key);
-			ResultSet rs = ps.executeQuery();
-			while (rs.next()) {
-				found.add(MovieInfo.fromRS(rs));
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		return found;
-	}
+	
 
-//	public List<TheaterInfo> getApplicationInfo() {
-//		LinkedList<TheaterInfo> found = new LinkedList<TheaterInfo>();
-//		String query = "SELECT   c_name, major, count() AS cnt\n" + "FROM     applications\n"
-//				+ "GROUP BY c_name, major\n" + "ORDER BY cnt DESC";
-//		try (PreparedStatement ps = conn.prepareStatement(query)) {
-//			ResultSet rs = ps.executeQuery();
-//			while (rs.next()) {
-//				found.add(TheaterInfo.fromRS(rs));
-//			}
-//		} catch (SQLException e) {
-//			e.printStackTrace();
-//		}
-//		return found;
-//	}
-//
-//	public void gradeFix(String college, double pct) {
-//		String stmt = "UPDATE students\n" + "SET    gpa = min(4, gpa * (1 + ?))\n" + "WHERE  s_id IN (\n"
-//				+ "    SELECT DISTINCT s_id\n" + "    FROM            applications\n"
-//				+ "    WHERE           c_name = ?\n" + ")";
-//		try (PreparedStatement ps = conn.prepareStatement(stmt)) {
-//			ps.setDouble(1, pct);
-//			ps.setString(2, college);
-//			ps.execute();
-//		} catch (SQLException e) {
-//			e.printStackTrace();
-//		}
-//	}
 
 	public String getPing(Response res) {
-		//res.type("application/json");
 		res.status(200);
-		//res.body("pong\n");
 		return "pong\n";
 	}
 	public String resetTable(Request req, Response res) {
@@ -152,6 +104,7 @@ class Database {
 		
 		res.type("application/json");
 		
+
 		String query = "DELETE FROM movies";  
 
 		 try (PreparedStatement ps = conn.prepareStatement(query)) {
@@ -200,77 +153,74 @@ class Database {
 		    e.printStackTrace();
 		return "caught";
 		}
-	
 
-		String queryCustomers =
-		"INSERT INTO customers (user_name, full_name, pass_word)\n" +
-		"VALUES  (?, ?, ?)\n";
-		String queryMovies =
-		"INSERT INTO movies(imdb_key, movie_name, production_year, playtime)\n" +
-		"VALUES (?,?,?,?)";
-		String queryTheaters = 
-		"INSERT INTO theaters(theater_name, capacity)\n" +
-		"VALUES (?,?)";
-
-		try{
-		PreparedStatement cust = conn.prepareStatement(queryCustomers);
-		PreparedStatement cust1 = conn.prepareStatement(queryCustomers);
-		PreparedStatement movie = conn.prepareStatement(queryMovies);
-		PreparedStatement movie1 = conn.prepareStatement(queryMovies);
-		PreparedStatement movie2 = conn.prepareStatement(queryMovies);
-		PreparedStatement movie3 = conn.prepareStatement(queryMovies);
-		PreparedStatement theater = conn.prepareStatement(queryTheaters);
-		PreparedStatement theater1 = conn.prepareStatement(queryTheaters);
-		PreparedStatement theater2 = conn.prepareStatement(queryTheaters);
-		cust.setString(1, "alice");
-		cust.setString(2, "Alice");
-		cust.setString(3, passGen.hash("dobido"));
-		cust.executeUpdate();
-		cust1.setString(1, "bob");
-		cust1.setString(2, "Bob");
-		cust1.setString(3, passGen.hash("whatsinaname"));
-		cust1.executeUpdate();
-		movie.setString(1, "tt5580390");
-		movie.setString(2, "The Shape of Water");
-		movie.setInt(3, 2017);
-		movie.setInt(4, 135);
-		movie.executeUpdate();
-		movie1.setString(1, "tt4975722");
-		movie1.setString(2, "Moonlight");
-		movie1.setInt(3, 2016);
-		movie1.setInt(4, 111);
-		movie1.executeUpdate();
-		movie2.setString(1, "tt1895587");
-		movie2.setString(2, "Spotlight");
-		movie2.setInt(3, 2015);
-		movie2.setInt(4, 135);
-		movie2.executeUpdate();
-		movie3.setString(1, "tt2562232");
-		movie3.setString(2, "Birdman");
-		movie3.setInt(3, 2014);
-		movie3.setInt(4, 132);
-		movie3.executeUpdate();
-		theater.setString(1, "Kino");
-		theater.setInt(2, 10);
-		theater.executeUpdate();
-		theater1.setString(1, "Södran");
-		theater1.setInt(2, 16);
-		theater1.executeUpdate();
-		theater2.setString(1, "Skandia");
-		theater2.setInt(2, 100);
-		theater2.executeUpdate();
+		newCustomer("alice", "Alice", passGen.hash("dobido"));
+		newCustomer("bob", "Bob", passGen.hash("whatsinaname"));
+		newMovie("tt5580390", "The Shape of Water", 2016, 135);
+		newMovie("tt4975722", "Moonlight", 2016, 111);
+		newMovie("tt1895587", "Spotlight", 2015, 120);
+		newMovie("tt2562232", "Birdman", 2014, 132);
+		newTheater("Kino", 10);
+		newTheater("Södran", 16);
+		newTheater("Skandia", 100);
 	
-		} catch (SQLException e) {
-		    e.printStackTrace();
-		return "caught";
-		}
 		res.body("ok");
 		res.status(200);
 		return "OK";
 	}
+	
+	private boolean newCustomer(String user_name, String full_name, String pass_word)
+	{
+		String queryCustomers =
+		"INSERT INTO customers (user_name, full_name, pass_word)\n" +
+		"VALUES  (?, ?, ?)\n";
+		try{
+		PreparedStatement cust = conn.prepareStatement(queryCustomers);
+		cust.setString(1, user_name);
+		cust.setString(2, full_name);
+		cust.setString(3, pass_word);
+		cust.executeUpdate();
+		return true;
+		}catch(SQLException e){
+			e.printStackTrace();
+			return false;
+		}
+	}
+	private boolean newMovie(String imdb_key, String movie_name, int production_year, int playtime)
+	{
+		String queryMovies =
+		"INSERT INTO movies(imdb_key, movie_name, production_year, playtime)\n" +
+		"VALUES (?,?,?,?)";
+		try{PreparedStatement movie = conn.prepareStatement(queryMovies);
+		movie.setString(1, imdb_key);
+		movie.setString(2, movie_name);
+		movie.setInt(3, production_year);
+		movie.setInt(4, playtime);
+		movie.executeUpdate();
+		return true;
+		}catch(SQLException e){
+			e.printStackTrace();
+			return false;
+		}
+	}
+	private boolean newTheater(String theater_name, int capacity){
+		String queryTheaters = 
+		"INSERT INTO theaters(theater_name, capacity)\n" +
+		"VALUES (?,?)";
+		try{
+			PreparedStatement theater = conn.prepareStatement(queryTheaters);
+			theater.setString(1, theater_name);
+			theater.setInt(2, capacity);
+			theater.executeUpdate();
+			return true;
+		}catch(SQLException e){
+			e.printStackTrace();
+			return false;
+		}
+	}
 
 public String getMovie (Request req, Response res, String imdb_key) {
-	res.type("aaplication/json");
+	res.type("application/json");
 	String query = 
 		"SELECT imdb_key AS imdbKey, movie_name AS name, production_year AS year\n" + 
 		"FROM movies\n" +
@@ -340,16 +290,19 @@ public String addTicket (Request req, Response res){
 		return "No tickets left";
 	}
 	String queryPassword =
-	"SELECT user_name, pass_word\n" +
+	"SELECT pass_word\n" +
 	"FROM customers\n" +
-	"WHERE user_name = ? AND pass_word = ?";
-	try(PreparedStatement ps = conn.prepareStatement(queryPassword)){
+	"WHERE user_name = ?";
+	try{
+		PreparedStatement ps = conn.prepareStatement(queryPassword);
 		ps.setString(1, req.queryParams("user"));
-		ps.setString(2, passGen.hash(req.queryParams("pwd")));
 		ResultSet rs = ps.executeQuery();	
+		if(!rs.getString(1).equals(passGen.hash(req.queryParams("pwd")))){
+			return "Wrong password";
+		}
 	}catch(SQLException e){
 		e.printStackTrace();
-		return "Wrong password";
+		return "Error";
 	}
 	String queryTicket =
 	"INSERT INTO tickets (user_name, screening_time, screening_date, theater_name)\n" +
@@ -388,9 +341,6 @@ public String addTicket (Request req, Response res){
 		"FROM tickets\n" +
 		"WHERE rowid = last_insert_rowid()";
 		try (PreparedStatement ps2 = conn.prepareStatement(queryFindId)) {
-			//ps2.setString(1, req.queryParams("theater"));
-			//ps2.setString(2, req.queryParams("date"));
-			//ps2.setString(3, req.queryParams("time"));
 			ResultSet rs = ps2.executeQuery();
 			ticketID = rs.getString(1);
 		}
@@ -493,7 +443,8 @@ public String getMovies(Request req, Response res){
 	if(req.queryParams().size() == 2){	
 			String title = req.queryParams("title");
 			int year = Integer.parseInt(req.queryParams("year"));
-			String query = "SELECT imdb_key AS imdbKey, movie_name AS title, production_year AS year \n" +			"FROM movies \n" +
+			String query = "SELECT imdb_key AS imdbKey, movie_name AS title, production_year AS year \n" +			
+			"FROM movies \n" +
 			"WHERE movie_name = ? AND production_year = ? \n";
 			
 		try (PreparedStatement ps = conn.prepareStatement(query)) {
@@ -530,154 +481,7 @@ else{
 	return "";
 }}
 
-
-public String getOneMovie(Request req, Response res, String movieString) {
-	if(true) { return "hejsan"; }
-	String query = "";
-	res.type("application/json");
-	if(movieString.indexOf('&') >= 0) {
-		String[] parts = movieString.split("&");
-		String title = parts[0];
-		String year = parts[1];
-		String[] partsYear = year.split("=");
-		int yearInt = Integer.parseInt(partsYear[1]);
-		query = "SELECT imdb_key AS imdbKey, movie_name AS title, production_year AS year \n" +			"FROM movies \n" +
-			"WHERE movie_name = ? AND production_year = ? \n";
-	try {
-	PreparedStatement ps = conn.prepareStatement(query);
-	ps.setString(1, title);
-	ps.setInt(2, yearInt);
-	ResultSet rs = ps.executeQuery();
-	String result = JSONizer.toJSON(rs, "data");
-	res.status(200);
-	res.body(result);
-	return "HEJSAN";
-//	return result;
-	}
-	catch (SQLException e) {
-	e.printStackTrace();
-	return "caught";
-	}
-	} else {
-	
-	}
-	
-	
-	return "";
 }
-	
-
-}
-
-/*
- * ApplicationInfo c_name -> college : String major : String cnt -> count : int
- */
-class ScreeningInfo {
-
-
-
-
-	public final Time screening_time;
-	public final Date screening_date;
-	public final int production_year;
-	public final String movie_name;
-	public final String theater_name;
-
-	public ScreeningInfo(Time screening_time, Date screening_date, int production_year, String movie_name,
-			String theater_name) {
-		super();
-		this.screening_time = screening_time;
-		this.screening_date = screening_date;
-		this.production_year = production_year;
-		this.movie_name = movie_name;
-		this.theater_name = theater_name;
-	}
-
-
-	public static ScreeningInfo fromRS(ResultSet rs) throws SQLException {
-		return new ScreeningInfo(rs.getTime("screening_time"), rs.getDate("screening_date"),
-				rs.getInt("production_year"), rs.getString("movie_name"), rs.getString("theater_name"));
-	}
-}
-
-class CustomerInfo {
-
-	public final String user_name;
-	public final String full_name;
-	public final String password;
-
-	public CustomerInfo(String user_name, String full_name, String password) {
-		this.user_name = user_name;
-		this.full_name = full_name;
-		this.password = password;
-	}
-
-	public static CustomerInfo fromRS(ResultSet rs) throws SQLException {
-		return new CustomerInfo(rs.getString("user_name"), rs.getString("full_name"), rs.getString("password"));
-	}
-}
-
-class TicketInfo {
-
-	public final int ticket_id;
-	public final String user_name;
-	public final Time screening_time;
-	public final Date screening_date;
-	public final String theater_name;
-
-	public TicketInfo(int ticket_id, String user_name, Time screening_time, Date screening_date, String theater_name) {
-
-		this.ticket_id = ticket_id;
-		this.user_name = user_name;
-		this.screening_time = screening_time;
-		this.screening_date = screening_date;
-		this.theater_name = theater_name;
-	}
-
-	public static TicketInfo fromRS(ResultSet rs) throws SQLException {
-		return new TicketInfo(rs.getInt("ticket_id"), rs.getString("user_name"), rs.getTime("screening_time"),
-				rs.getDate("screening_date"), rs.getString("theater_name"));
-	}
-}
-
-class TheaterInfo {
-
-	public final String theather_name;
-	public final int capacity;
-
-	public TheaterInfo(String theather_name, int capacity) {
-
-		this.theather_name = theather_name;
-		this.capacity = capacity;
-	}
-
-	public static TheaterInfo fromRS(ResultSet rs) throws SQLException {
-		return new TheaterInfo(rs.getString("theater_name"), rs.getInt("capacity"));
-	}
-}
-
-class MovieInfo {
-
-	public final String movie_name;
-	public final int production_year;
-	public final int playtime;
-	public final String imdb_key;
-
-	public MovieInfo(String movie_name, int year, int playtime, String imdb_key) {
-		this.movie_name = movie_name;
-		this.production_year = year;
-		this.playtime = playtime;
-		this.imdb_key = imdb_key;
-	}
-
-	public static MovieInfo fromRS(ResultSet rs) throws SQLException {
-		return new MovieInfo(rs.getString("movie_name"), rs.getInt("production_year"), rs.getInt("playtime"),
-				rs.getString("imdb_key"));
-	}
-}
-
-
-
 /**
  * Auxiliary class for automatically translating a ResultSet to JSON
  */
