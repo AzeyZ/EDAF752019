@@ -21,12 +21,15 @@ product_name TEXT PRIMARY KEY
 CREATE TABLE materials (
 ingredient TEXT PRIMARY KEY,
 amount INT
+-- Added unit to match rest-API description
+unit TEXT,
 );
 
 CREATE TABLE used_materials (
 used_amount INT,
 FOREIGN KEY (ingredient) REFERENCES materials (ingredient),
-PRIMARY KEY (used_amount, ingredient)
+FOREIGN KEY (product_name) REFERENCES products (product_name),
+PRIMARY KEY (used_amount, ingredient, product_name)
 );
 
 CREATE TABLE restocks (
