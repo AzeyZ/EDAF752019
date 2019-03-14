@@ -1,3 +1,4 @@
+package lab3_edaf75;
 
 public class App {
 
