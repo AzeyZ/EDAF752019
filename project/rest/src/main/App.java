@@ -8,7 +8,6 @@ import java.sql.*;
 import java.util.*;
 
 import javax.xml.ws.Response;
-
 import spark.*;
 import static spark.Spark.*;
 import com.google.gson.Gson;
@@ -22,13 +21,19 @@ public class App {
 	public static void main(String[] args) {
 		Database db = new Database("bakery.db");
 		port(8888); // Port 7007 in project 3
-
-		// get("/ping", (req, res) -> db.getPing(res));
-		// post("/reset", (req, res) -> db.resetTable(req, res));
+		
+		// The following calls are implemented, but not necessarely tested
+		get("/ping", (req, res) -> db.getPing(res)); // Used in lab3
+		post("/reset", (req, res) -> db.resetTable(req, res));
+		get("/customers", (req, res)-> db.getCustomers(req, res));
+		get("/ingredients", (req, res) -> db.getIngredients(req, res));
+		get("/cookies", (req, res) -> db.getCookies(req, res));
+		get("/recipes", (req, res) -> db.getRecipes(req, res));
+		get("/pallets", (req, res) -> db.getPallets(req, res));
+		
 		// post("/performances", (req, res) -> db.addPerformance(req, res));
 		// post("/tickets", (req, res) -> db.addTicket(req, res));
-		// get("/movies", (req, res)-> db.getMovies(req, res));
-		// get("/performances", (req, res) -> db.getPerformances(req, res));
+		
 		// get("/movies/:imdb-key", (req, res) -> db.getMovie(req, res,
 		// req.params(":imdb-key")));
 		// get("/customers/:username/tickets", (req, res) -> db.getCustomer(req, res,
@@ -290,15 +295,31 @@ class Database {
 		}
 	}
 
-	public String getMovie(Request req, Response res, String imdb_key) {
+	public String getCustomer(Request req, Response res) {
 		res.type("application/json");
-		String query = "SELECT imdb_key AS imdbKey, movie_name AS name, production_year AS year\n" + "FROM movies\n"
-				+ "WHERE imdbKey = ?\n";
+		String query = "SELECT name, address\n"
+			+ "FROM customers";
 
 		try (PreparedStatement ps = conn.prepareStatement(query)) {
-			ps.setString(1, imdb_key);
 			ResultSet rs = ps.executeQuery();
-			String result = JSONizer.toJSON(rs, "data");
+			String result = JSONizer.toJSON(rs, "customers");
+			res.status(200);
+			res.body(result);
+			return result;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return "";
+	}
+	
+	public String getIngredients(Request req, Response res) {
+		res.type("application/json");
+		String query = "SELECT ingredient, amount, unit\n"
+			+ "FROM materials";
+
+		try (PreparedStatement ps = conn.prepareStatement(query)) {
+			ResultSet rs = ps.executeQuery();
+			String result = JSONizer.toJSON(rs, "ingredients");
 			res.status(200);
 			res.body(result);
 			return result;
@@ -308,18 +329,59 @@ class Database {
 
 		return "";
 	}
-
-	public String getCustomer(Request req, Response res, String username) {
+	
+	public String getCookies (Request req, Response res) {
 		res.type("application/json");
-		String query = "SELECT screening_date AS date, screening_time AS time,"
-				+ "theater_name AS theater, movie_name AS title," + "production_year AS year, count() AS nbrOfTickets\n"
-				+ "FROM tickets\n" + "JOIN screenings\n" + "USING (screening_date, screening_time, theater_name)\n"
-				+ "WHERE user_name = ?\n" + "GROUP BY screening_id\n";
+		String query = "SELECT product_name AS name\n"
+			+ "FROM products";
 
 		try (PreparedStatement ps = conn.prepareStatement(query)) {
-			ps.setString(1, username);
 			ResultSet rs = ps.executeQuery();
-			String result = JSONizer.toJSON(rs, "data");
+			String result = JSONizer.toJSON(rs, "cookies");
+			res.status(200);
+			res.body(result);
+			return result;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		return "";
+	}
+	
+	public String getRecipes (Request req, Response res) {
+		res.type("application/json");
+		String query = "SELECT product_name AS cookie, ingredient, amount AS quantity, unit\n"
+			+ "FROM used_material\n"
+			+ "JOIN materials\n"
+			+ "USING ingredient\n"
+			+ "ORDER BY product_name, ingredient";
+
+		try (PreparedStatement ps = conn.prepareStatement(query)) {
+			ResultSet rs = ps.executeQuery();
+			String result = JSONizer.toJSON(rs, "recipes");
+			res.status(200);
+			res.body(result);
+			return result;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		return "";
+	}
+	
+	public String addPallet (Request req, Response res, String cookieName) {
+		// Each pallet contains 15*10*36=5400 cookies
+		// Recipes are described for 100 cookies
+	}
+	
+	public String getPallets(Request req, Response res) {
+		res.type("application/json");
+		String query = "SELECT pallet_id AS id, product_name AS cookie, production_date AS productionDate, customer_name AS customer, blocked\n"
+			+ "FROM pallets\n";
+
+		try (PreparedStatement ps = conn.prepareStatement(query)) {
+			ResultSet rs = ps.executeQuery();
+			String result = JSONizer.toJSON(rs, "pallets");
 			res.status(200);
 			res.body(result);
 			return result;
