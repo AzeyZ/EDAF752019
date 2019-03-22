@@ -124,7 +124,7 @@ class Database {
 	}
 
 	// Adds all the spciified customers in reset
-	private void addCustomers () {
+	private void addCustomers() {
 		newCustomer("Finkakor AB", "Helsingborg");
 		newCustomer("Småbröd AB", "Malmö");
 		newCustomer("Kaffebröd AB", "Landskrona");
@@ -262,7 +262,7 @@ class Database {
 	}
 
 	private boolean newMaterial(String ingredient, int amount, String unit) {
-		String queryMaterials = "INSERT INTO theaters(ingredient, amount)\n" + 
+		String queryMaterials = "INSERT INTO materials(ingredient, amount)\n" + 
 			"VALUES (?, ?, ?)";
 		try {
 			PreparedStatement material = conn.prepareStatement(queryMaterials);
