@@ -118,9 +118,8 @@ class Database {
 		addUsedMaterials();
 		
 		// Should return json object with "status" set to "ok"
-		res.body("ok");
 		res.status(200);
-		return res.toString();
+		return "ok";
 	}
 
 	// Adds all the spciified customers in reset
@@ -295,7 +294,7 @@ class Database {
 
 	public String getCustomer(Request req, Response res) {
 		res.type("application/json");
-		String query = "SELECT customer_name, address\n"
+		String query = "SELECT *\n"
 			+ "FROM customers";
 
 		try (PreparedStatement ps = conn.prepareStatement(query)) {
@@ -307,7 +306,7 @@ class Database {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		return "";
+		return "error";
 	}
 	
 	public String getIngredients(Request req, Response res) {
