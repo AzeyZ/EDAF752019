@@ -359,11 +359,11 @@ class Database {
 	
 	public String getRecipes (Request req, Response res) {
 		res.type("application/json");
-		String query = "SELECT product_name AS cookie, ingredient, amount AS quantity, unit\n"
-			+ "FROM used_material\n"
+		String query = "SELECT product_name AS cookie, ingredient, amount AS quantity\n"
+			+ "FROM used_materials\n"
 			+ "JOIN materials\n"
-			+ "USING ingredient\n"
-			+ "ORDER BY product_name, ingredient";
+			+ "USING (ingredient)\n"
+			+ "ORDER BY cookie, ingredient";
 
 		try (PreparedStatement ps = conn.prepareStatement(query)) {
 			ResultSet rs = ps.executeQuery();
