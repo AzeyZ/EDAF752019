@@ -1,5 +1,5 @@
 -- This will be used to add data to the databases.
-INSERT INTO customers (name, address)
+INSERT INTO customers (customer_name, address)
 VALUES	("Finkakor AB", "Helsingborg"),
 	("Småbröd AB", "Malmö"),
 	("Kaffebröd AB", "Landskrona"),
