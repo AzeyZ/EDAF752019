@@ -20,7 +20,7 @@ product_name TEXT PRIMARY KEY
 
 CREATE TABLE materials (
 ingredient TEXT PRIMARY KEY,
-amount INT
+amount INT,
 -- Added unit to match rest-API description
 unit TEXT
 );
