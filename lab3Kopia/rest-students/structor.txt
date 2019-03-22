@@ -1,0 +1,5 @@
+1. En tabell med recept till varje kaka per 100 kakor.
+2. bag - 15 kakor, box - 10 bags, pallets - 36 boxes.
+3. Skickar bara hela pallets.
+4. Customer table; Cutomer, Address.
+5. Each truck loads 60 pallets
