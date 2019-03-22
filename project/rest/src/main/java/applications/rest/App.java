@@ -6,8 +6,6 @@ package applications.rest;
 import java.sql.Date;
 import java.sql.*;
 import java.util.*;
-
-import javax.xml.ws.Response;
 import spark.*;
 import static spark.Spark.*;
 import com.google.gson.Gson;
@@ -25,7 +23,7 @@ public class App {
 		// The following calls are implemented, but not necessarely tested
 		get("/ping", (req, res) -> db.getPing(res)); // Used in lab3
 		post("/reset", (req, res) -> db.resetTable(req, res));
-		get("/customers", (req, res)-> db.getCustomers(req, res));
+		get("/customers", (req, res)-> db.getCustomer(req, res));
 		get("/ingredients", (req, res) -> db.getIngredients(req, res));
 		get("/cookies", (req, res) -> db.getCookies(req, res));
 		get("/recipes", (req, res) -> db.getRecipes(req, res));
@@ -107,12 +105,12 @@ class Database {
 		return "pong\n";
 	}
 
-	public String resetTable(Request req, Response<T> res) {
+	public String resetTable(Request req, Response res) {
 
 		res.type("application/json");
 
 		// Emptying all the tables
-		emptydatabase();
+		emptyDatabase();
 		
 		addCustomers();
 		addProducts();
@@ -210,7 +208,7 @@ class Database {
 		newUsedMaterial("Berliner", "Chocolate", 50);
 	}
 	
-	private void emptyDatabase () {
+	private void emptyDatabase() {
 		ArrayList<String> names = new ArrayList<>();
 		names.add("products");
 		names.add("materials");
@@ -222,7 +220,7 @@ class Database {
 		names.add("orders");
 		
 		for (String name : names) {
-			query = "DELETE FROM " + name;
+			String query = "DELETE FROM " + name;
 
 			try (PreparedStatement ps = conn.prepareStatement(query)) {
 				ps.executeUpdate();
@@ -279,7 +277,7 @@ class Database {
 		}
 	}
 
-	private boolean newUsedMaterial(int product_name, String ingredient, String used_amount) {
+	private boolean newUsedMaterial(String product_name, String ingredient, int used_amount) {
 		String queryUsedMaterials = "INSERT INTO used_materials(used_amount, unit, product_name)\n" + 
 			"VALUES (?, ?, ?)";
 		try {
@@ -372,6 +370,7 @@ class Database {
 	public String addPallet (Request req, Response res, String cookieName) {
 		// Each pallet contains 15*10*36=5400 cookies
 		// Recipes are described for 100 cookies
+		return null;
 	}
 	
 	public String getPallets(Request req, Response res) {
@@ -638,3 +637,4 @@ class JSONizer {
 		}
 	}
 }
+
