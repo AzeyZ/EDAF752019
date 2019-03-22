@@ -29,6 +29,8 @@ CREATE TABLE used_materials (
 used_amount INT,
 ingredient TEXT,
 product_name TEXT,
+unit TEXT,
+FOREIGN KEY (unit) REFERENCES materials (unit),
 FOREIGN KEY (ingredient) REFERENCES materials (ingredient),
 FOREIGN KEY (product_name) REFERENCES products (product_name),
 PRIMARY KEY (used_amount, ingredient, product_name)
