@@ -9,8 +9,8 @@ import java.util.*;
 import spark.*;
 import static spark.Spark.*;
 import com.google.gson.Gson;
-import com.sun.tools.internal.ws.processor.model.Request;
-import com.sun.tools.internal.ws.processor.model.Response;
+//import com.sun.tools.internal.ws.processor.model.Request;
+//import com.sun.tools.internal.ws.processor.model.Response;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -31,8 +31,8 @@ public class App {
 		get("/cookies", (req, res) -> db.getCookies(req, res));
 		get("/recipes", (req, res) -> db.getRecipes(req, res));
 		get("/pallets", (req, res) -> db.getPallets(req, res)); //TODO
-		post("/block", (req, res) -> db.block(req, res)); //TODO
-		post("/unblock", (req, res) -> db.unblock(req, res)); //TODO
+// 		post("/block", (req, res) -> db.block(req, res)); //TODO
+//		post("/unblock", (req, res) -> db.unblock(req, res)); //TODO
 		
 		// post("/performances", (req, res) -> db.addPerformance(req, res));
 		// post("/tickets", (req, res) -> db.addTicket(req, res));
