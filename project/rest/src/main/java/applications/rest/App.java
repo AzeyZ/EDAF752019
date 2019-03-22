@@ -9,6 +9,9 @@ import java.util.*;
 import spark.*;
 import static spark.Spark.*;
 import com.google.gson.Gson;
+import com.sun.tools.internal.ws.processor.model.Request;
+import com.sun.tools.internal.ws.processor.model.Response;
+
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.nio.charset.StandardCharsets;
@@ -27,7 +30,9 @@ public class App {
 		get("/ingredients", (req, res) -> db.getIngredients(req, res));
 		get("/cookies", (req, res) -> db.getCookies(req, res));
 		get("/recipes", (req, res) -> db.getRecipes(req, res));
-		get("/pallets", (req, res) -> db.getPallets(req, res));
+		get("/pallets", (req, res) -> db.getPallets(req, res)); //TODO
+		post("/block", (req, res) -> db.block(req, res)); //TODO
+		post("/unblock", (req, res) -> db.unblock(req, res)); //TODO
 		
 		// post("/performances", (req, res) -> db.addPerformance(req, res));
 		// post("/tickets", (req, res) -> db.addTicket(req, res));
@@ -120,6 +125,12 @@ class Database {
 		// Should return json object with "status" set to "ok"
 		res.status(200);
 		return "ok";
+	}
+	public String blockPallet(Request req, Response res){
+		return null;
+	}
+	public String unblockPallet(Request req, Response res){
+		return null;
 	}
 
 	// Adds all the spciified customers in reset
