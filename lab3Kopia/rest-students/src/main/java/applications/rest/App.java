@@ -33,6 +33,7 @@ public class App {
 		get("/pallets", (req, res) -> db.getPallets(req, res)); //TODO
 // 		post("/block", (req, res) -> db.block(req, res)); //TODO
 //		post("/unblock", (req, res) -> db.unblock(req, res)); //TODO
+
 		
 		// post("/performances", (req, res) -> db.addPerformance(req, res));
 		// post("/tickets", (req, res) -> db.addTicket(req, res));
