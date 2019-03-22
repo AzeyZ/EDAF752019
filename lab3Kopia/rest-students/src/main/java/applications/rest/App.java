@@ -273,7 +273,7 @@ class Database {
 	}
 
 	private boolean newMaterial(String ingredient, int amount, String unit) {
-		String queryMaterials = "INSERT INTO materials(ingredient, amount)\n" + 
+		String queryMaterials = "INSERT INTO materials(ingredient, amount, unit)\n" + 
 			"VALUES (?, ?, ?)";
 		try {
 			PreparedStatement material = conn.prepareStatement(queryMaterials);
