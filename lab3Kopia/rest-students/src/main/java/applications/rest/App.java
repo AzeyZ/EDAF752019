@@ -375,7 +375,7 @@ class Database {
 			e.printStackTrace();
 		}
 
-		return "";
+		return "error";
 	}
 	
 	public String addPallet (Request req, Response res, String cookieName) {
