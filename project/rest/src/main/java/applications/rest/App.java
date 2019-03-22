@@ -232,7 +232,7 @@ class Database {
 	}
 	
 	private boolean newCustomer(String name, String address) {
-		String queryCustomers = "INSERT INTO customers (name, address)\n" + 
+		String queryCustomers = "INSERT INTO customers (customer_name, address)\n" + 
 			"VALUES  (?, ?)\n";
 
 		try {
@@ -295,7 +295,7 @@ class Database {
 
 	public String getCustomer(Request req, Response res) {
 		res.type("application/json");
-		String query = "SELECT name, address\n"
+		String query = "SELECT customer_name, address\n"
 			+ "FROM customers";
 
 		try (PreparedStatement ps = conn.prepareStatement(query)) {
