@@ -4,6 +4,8 @@
 package applications.rest;
 
 import java.sql.Date;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.sql.*;
 import java.util.*;
 import spark.*;
@@ -23,14 +25,14 @@ public class App {
 		Database db = new Database("bakery.db");
 		port(8888); // Port 7007 in project 3
 		
-		// The following calls are implemented, but not necessarely tested
 		get("/ping", (req, res) -> db.getPing(res)); // Used in lab3
 		post("/reset", (req, res) -> db.resetTable(req, res));
 		get("/customers", (req, res)-> db.getCustomer(req, res));
 		get("/ingredients", (req, res) -> db.getIngredients(req, res));
 		get("/cookies", (req, res) -> db.getCookies(req, res));
 		get("/recipes", (req, res) -> db.getRecipes(req, res));
-		get("/pallets", (req, res) -> db.getPallets(req, res)); //TODO
+		get("/pallets", (req, res) -> db.getPallets(req, res));
+		
 // 		post("/block", (req, res) -> db.block(req, res)); //TODO
 //		post("/unblock", (req, res) -> db.unblock(req, res)); //TODO
 
@@ -181,42 +183,42 @@ class Database {
 	
 	// Adds all the spciified recipes in reset
 	private void addUsedMaterials () {
-		newUsedMaterial("Nut ring", "Flour", 450);
-		newUsedMaterial("Nut ring", "Butter", 450);
-		newUsedMaterial("Nut ring", "Icing sugar", 190);
-		newUsedMaterial("Nut ring", "Roasted, chopped nuts", 225);
+		newUsedMaterial("Nut ring", "Flour", 450, "g");
+		newUsedMaterial("Nut ring", "Butter", 450, "g");
+		newUsedMaterial("Nut ring", "Icing sugar", 190, "g");
+		newUsedMaterial("Nut ring", "Roasted, chopped nuts", 225, "g");
 		
-		newUsedMaterial("Nut cookie", "Fine-ground nuts", 750);
-		newUsedMaterial("Nut cookie", "Ground, roasted nuts", 625);
-		newUsedMaterial("Nut cookie", "Bread crumbs", 125);
-		newUsedMaterial("Nut cookie", "Sugar", 375);
-		newUsedMaterial("Nut cookie", "Egg whites", 350);
-		newUsedMaterial("Nut cookie", "Chocolate", 50);
+		newUsedMaterial("Nut cookie", "Fine-ground nuts", 750, "g");
+		newUsedMaterial("Nut cookie", "Ground, roasted nuts", 625, "g");
+		newUsedMaterial("Nut cookie", "Bread crumbs", 125, "g");
+		newUsedMaterial("Nut cookie", "Sugar", 375, "g");
+		newUsedMaterial("Nut cookie", "Egg whites", 350, "ml");
+		newUsedMaterial("Nut cookie", "Chocolate", 50, "g");
 		
-		newUsedMaterial("Amneris", "Marzipan", 750);
-		newUsedMaterial("Amneris", "Butter", 250);
-		newUsedMaterial("Amneris", "Eggs", 250);
-		newUsedMaterial("Amneris", "Potato starch", 25);
-		newUsedMaterial("Amneris", "Wheat flour", 25);
+		newUsedMaterial("Amneris", "Marzipan", 750, "g");
+		newUsedMaterial("Amneris", "Butter", 250, "g");
+		newUsedMaterial("Amneris", "Eggs", 250, "g");
+		newUsedMaterial("Amneris", "Potato starch", 25, "g");
+		newUsedMaterial("Amneris", "Wheat flour", 25, "g");
 		
-		newUsedMaterial("Tango", "Butter", 200);
-		newUsedMaterial("Tango", "Sugar", 250);
-		newUsedMaterial("Tango", "Flour", 300);
-		newUsedMaterial("Tango", "Sodium bicarbonate", 4);
-		newUsedMaterial("Tango", "Vanilla", 2);
+		newUsedMaterial("Tango", "Butter", 200, "g");
+		newUsedMaterial("Tango", "Sugar", 250, "g");
+		newUsedMaterial("Tango", "Flour", 300, "g");
+		newUsedMaterial("Tango", "Sodium bicarbonate", 4, "g");
+		newUsedMaterial("Tango", "Vanilla", 2, "g");
 		
-		newUsedMaterial("Almond delight", "Butter", 400);
-		newUsedMaterial("Almond delight", "Sugar", 270);
-		newUsedMaterial("Almond delight", "Chopped almonds", 279);
-		newUsedMaterial("Almond delight", "Flour", 400);
-		newUsedMaterial("Almond delight", "Cinnamon", 10);
+		newUsedMaterial("Almond delight", "Butter", 400, "g");
+		newUsedMaterial("Almond delight", "Sugar", 270, "g");
+		newUsedMaterial("Almond delight", "Chopped almonds", 279, "g");
+		newUsedMaterial("Almond delight", "Flour", 400, "g");
+		newUsedMaterial("Almond delight", "Cinnamon", 10, "g");
 		
-		newUsedMaterial("Berliner", "Flour", 350);
-		newUsedMaterial("Berliner", "Butter", 250);
-		newUsedMaterial("Berliner", "Icing sugar", 100);
-		newUsedMaterial("Berliner", "Eggs", 50);
-		newUsedMaterial("Berliner", "Vanilla sugar", 5);
-		newUsedMaterial("Berliner", "Chocolate", 50);
+		newUsedMaterial("Berliner", "Flour", 350, "g");
+		newUsedMaterial("Berliner", "Butter", 250, "g");
+		newUsedMaterial("Berliner", "Icing sugar", 100, "g");
+		newUsedMaterial("Berliner", "Eggs", 50, "g");
+		newUsedMaterial("Berliner", "Vanilla sugar", 5, "g");
+		newUsedMaterial("Berliner", "Chocolate", 50, "g");
 	}
 	
 	private void emptyDatabase() {
@@ -288,14 +290,15 @@ class Database {
 		}
 	}
 
-	private boolean newUsedMaterial(String product_name, String ingredient, int used_amount) {
-		String queryUsedMaterials = "INSERT INTO used_materials(used_amount, unit, product_name)\n" + 
-			"VALUES (?, ?, ?)";
+	private boolean newUsedMaterial(String product_name, String ingredient, int used_amount, String unit) {
+		String queryUsedMaterials = "INSERT INTO used_materials(used_amount, ingredient, product_name, unit)\n" + 
+			"VALUES (?, ?, ?, ?)";
 		try {
 			PreparedStatement usedMaterial = conn.prepareStatement(queryUsedMaterials);
-			usedMaterial.setString(1, product_name);
+			usedMaterial.setInt(1, used_amount);
 			usedMaterial.setString(2, ingredient);
-			usedMaterial.setInt(3, used_amount);
+			usedMaterial.setString(3, product_name);
+			usedMaterial.setString(4, unit);
 			usedMaterial.executeUpdate();
 			return true;
 		} catch (SQLException e) {
@@ -379,9 +382,74 @@ class Database {
 	}
 	
 	public String addPallet (Request req, Response res, String cookieName) {
+		// Compare with "getMovies" in lab 3
 		// Each pallet contains 15*10*36=5400 cookies
 		// Recipes are described for 100 cookies
-		return null;
+		res.type("application/json");
+		
+		String product_name = "";
+		
+		String queryFindCookie = 
+		    "SELECT product_name\n" +
+		    "FROM products\n" +
+		    "WHERE product_name = ?";
+		try (PreparedStatement ps = conn.prepareStatement(queryFindCookie)) {
+			ps.setString(1, cookieName);
+			ResultSet rs = ps.executeQuery();
+			product_name = rs.getString(1);
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return "error";
+		}
+		if (product_name.equals("")) {
+			return "No such cookie";
+		}
+		
+		String queryCompareIngredient = 
+		    "SELECT amount, used_amount, ingredient\n" + 
+		    "FROM used_materials\n" +
+		    "JOIN materials\n" + 
+		    "USING ingredient\n" +
+		    "WHERE amount = used_amount AND product_name = ?";
+		int amount;
+		int used_amount;
+		
+		try (PreparedStatement ps = conn.prepareStatement(queryCompareIngredient)) {
+			ps.setString(1, cookieName);
+			ResultSet rs = ps.executeQuery();
+			
+			while (true) {
+				amount = rs.getInt(1);
+				used_amount = rs.getInt(2);
+				if (used_amount > amount) {
+					return "Not enough ingredients!";
+				}
+				
+				if (!rs.next()) {
+					break;
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return "error";
+		}
+		
+		// If no returns above we insert a pallet
+		// Have to add fields for production date and time (how?)
+		String queryInsert = 
+			"INSERT INTO pallets (blocked, product_name)\n" +
+			"VALUES (?, ?)\n";
+		
+		try (PreparedStatement ps = conn.prepareStatement(queryInsert)) {
+			// ps.setDate(1, );
+			// ps.setTime(2, Time.now());
+			ps.setInt(1, 0);
+			ps.setString(2, cookieName);
+			return "added pallet";
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return "error";
+		}
 	}
 	
 	public String getPallets(Request req, Response res) {
@@ -508,7 +576,6 @@ class Database {
 			ps.setString(4, title);
 			ps.setString(5, req.queryParams("theater"));
 			ps.setInt(6, capacity_new);
-			ps.executeUpdate();
 		} catch (SQLException e) {
 			e.printStackTrace();
 			return "#369_multiple_error?";
