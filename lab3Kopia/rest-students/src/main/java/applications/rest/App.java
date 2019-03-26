@@ -183,42 +183,43 @@ class Database {
 	
 	// Adds all the spciified recipes in reset
 	private void addUsedMaterials () {
-		newUsedMaterial("Nut ring", "Flour", 450, "g");
-		newUsedMaterial("Nut ring", "Butter", 450, "g");
-		newUsedMaterial("Nut ring", "Icing sugar", 190, "g");
-		newUsedMaterial("Nut ring", "Roasted, chopped nuts", 225, "g");
 		
-		newUsedMaterial("Nut cookie", "Fine-ground nuts", 750, "g");
-		newUsedMaterial("Nut cookie", "Ground, roasted nuts", 625, "g");
-		newUsedMaterial("Nut cookie", "Bread crumbs", 125, "g");
-		newUsedMaterial("Nut cookie", "Sugar", 375, "g");
-		newUsedMaterial("Nut cookie", "Egg whites", 350, "ml");
-		newUsedMaterial("Nut cookie", "Chocolate", 50, "g");
+		newUsedMaterial(450, "Flour", "Nut ring", "g");
+		newUsedMaterial(450, "Butter", "Nut ring", "g");
+		newUsedMaterial(190, "Icing sugar", "Nut ring", "g");
+		newUsedMaterial(225, "Roasted, chopped nuts", "Nut ring", "g");
 		
-		newUsedMaterial("Amneris", "Marzipan", 750, "g");
-		newUsedMaterial("Amneris", "Butter", 250, "g");
-		newUsedMaterial("Amneris", "Eggs", 250, "g");
-		newUsedMaterial("Amneris", "Potato starch", 25, "g");
-		newUsedMaterial("Amneris", "Wheat flour", 25, "g");
+		newUsedMaterial(750, "Fine-ground nuts", "Nut cookie", "g");
+		newUsedMaterial(625, "Ground, roasted nuts", "Nut cookie", "g");
+		newUsedMaterial(125, "Bread crumbs", "Nut cookie", "g");
+		newUsedMaterial(375, "Sugar", "Nut cookie", "g");
+		newUsedMaterial(350, "Egg whites", "Nut cookie", "ml");
+		newUsedMaterial(50, "Chocolate", "Nut cookie", "g");
 		
-		newUsedMaterial("Tango", "Butter", 200, "g");
-		newUsedMaterial("Tango", "Sugar", 250, "g");
-		newUsedMaterial("Tango", "Flour", 300, "g");
-		newUsedMaterial("Tango", "Sodium bicarbonate", 4, "g");
-		newUsedMaterial("Tango", "Vanilla", 2, "g");
+		newUsedMaterial(750, "Marzipan", "Amneris", "g");
+		newUsedMaterial(250, "Butter", "Amneris", "g");
+		newUsedMaterial(250, "Eggs", "Amneris", "g");
+		newUsedMaterial(25, "Patato starch", "Amneris", "g");
+		newUsedMaterial(25, "Wheat flour", "Amneris", "g");
 		
-		newUsedMaterial("Almond delight", "Butter", 400, "g");
-		newUsedMaterial("Almond delight", "Sugar", 270, "g");
-		newUsedMaterial("Almond delight", "Chopped almonds", 279, "g");
-		newUsedMaterial("Almond delight", "Flour", 400, "g");
-		newUsedMaterial("Almond delight", "Cinnamon", 10, "g");
+		newUsedMaterial(200, "Butter", "Tango", "g");
+		newUsedMaterial(250, "Sugar", "Tango", "g");
+		newUsedMaterial(300, "Flour", "Tango", "g");
+		newUsedMaterial(4, "Sodium bicarbonate", "Tango", "g");
+		newUsedMaterial(2, "Vanilla", "Tango", "g");
 		
-		newUsedMaterial("Berliner", "Flour", 350, "g");
-		newUsedMaterial("Berliner", "Butter", 250, "g");
-		newUsedMaterial("Berliner", "Icing sugar", 100, "g");
-		newUsedMaterial("Berliner", "Eggs", 50, "g");
-		newUsedMaterial("Berliner", "Vanilla sugar", 5, "g");
-		newUsedMaterial("Berliner", "Chocolate", 50, "g");
+		newUsedMaterial(400, "Butter", "Almond delight", "g");
+		newUsedMaterial(270, "Sugar", "Almond delight", "g");
+		newUsedMaterial(279, "Chopped almonds", "Almond delight", "g");
+		newUsedMaterial(400, "Flour", "Almond delight", "g");
+		newUsedMaterial(10, "Cinnamon", "Almond delight", "g");
+		
+		newUsedMaterial(350, "Flour", "Berliner", "g");
+		newUsedMaterial(250, "Butter", "Berliner", "g");
+		newUsedMaterial(100, "Icing sugar", "Berliner", "g");
+		newUsedMaterial(50, "Eggs", "Berliner", "g");
+		newUsedMaterial(5, "Vanilla sugar", "Berliner", "g");
+		newUsedMaterial(50, "Chocolate", "Berliner", "g");
 	}
 	
 	private void emptyDatabase() {
@@ -290,7 +291,7 @@ class Database {
 		}
 	}
 
-	private boolean newUsedMaterial(String product_name, String ingredient, int used_amount, String unit) {
+	private boolean newUsedMaterial(int used_amount, String ingredient, String product_name, String unit) {
 		String queryUsedMaterials = "INSERT INTO used_materials(used_amount, ingredient, product_name, unit)\n" + 
 			"VALUES (?, ?, ?, ?)";
 		try {
@@ -362,11 +363,10 @@ class Database {
 	
 	public String getRecipes (Request req, Response res) {
 		res.type("application/json");
-		String query = "SELECT product_name AS cookie, ingredient, amount AS quantity\n"
-			+ "FROM used_materials\n"
-			+ "JOIN materials\n"
-			+ "USING (ingredient)\n"
-			+ "ORDER BY cookie, ingredient";
+		String query = 
+			"SELECT product_name AS cookie, ingredient, used_amount AS quantity, unit\n" +
+			"FROM used_materials\n" +
+			"ORDER BY product_name, ingredient";
 
 		try (PreparedStatement ps = conn.prepareStatement(query)) {
 			ResultSet rs = ps.executeQuery();
