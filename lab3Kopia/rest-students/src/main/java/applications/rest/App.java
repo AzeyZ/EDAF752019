@@ -3,10 +3,9 @@
  */
 package applications.rest;
 
-import java.sql.Date;
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.sql.*;
+import java.sql.Date;
 import java.util.*;
 import spark.*;
 import static spark.Spark.*;
@@ -32,6 +31,7 @@ public class App {
 		get("/cookies", (req, res) -> db.getCookies(req, res));
 		get("/recipes", (req, res) -> db.getRecipes(req, res));
 		get("/pallets", (req, res) -> db.getPallets(req, res));
+		post("/pallets", (req, res) -> db.addPallet(req, res));
 		post("/block/*/*/*", (req, res) -> db.blockPallets(req, res));
 //		post("/unblock/:cookie-name/:from-date/:to-date"), (req, res) -> db.unBlockPallets(req, res));
 
@@ -380,7 +380,7 @@ class Database {
 		return "error";
 	}
 	
-	public String addPallet (Request req, Response res, String cookieName) {
+	public String addPallet (Request req, Response res) {
 		// Compare with "getMovies" in lab 3
 		// Each pallet contains 15*10*36=5400 cookies
 		// Recipes are described for 100 cookies
@@ -393,7 +393,7 @@ class Database {
 		    "FROM products\n" +
 		    "WHERE product_name = ?";
 		try (PreparedStatement ps = conn.prepareStatement(queryFindCookie)) {
-			ps.setString(1, cookieName);
+			ps.setString(1, req.queryParams("cookie"));
 			ResultSet rs = ps.executeQuery();
 			product_name = rs.getString(1);
 		} catch (SQLException e) {
@@ -404,17 +404,17 @@ class Database {
 			return "No such cookie";
 		}
 		
+		int amount;
+		int used_amount;
 		String queryCompareIngredient = 
 		    "SELECT amount, used_amount, ingredient\n" + 
 		    "FROM used_materials\n" +
 		    "JOIN materials\n" + 
 		    "USING ingredient\n" +
-		    "WHERE amount = used_amount AND product_name = ?";
-		int amount;
-		int used_amount;
+		    "WHERE product_name = ?";
 		
 		try (PreparedStatement ps = conn.prepareStatement(queryCompareIngredient)) {
-			ps.setString(1, cookieName);
+			ps.setString(1, req.queryParams("cookie"));
 			ResultSet rs = ps.executeQuery();
 			
 			while (true) {
@@ -435,16 +435,18 @@ class Database {
 		
 		// If no returns above we insert a pallet
 		// Have to add fields for production date and time (how?)
+		
+		LocalDate date = LocalDate.now();
+		
 		String queryInsert = 
-			"INSERT INTO pallets (blocked, product_name)\n" +
-			"VALUES (?, ?)\n";
+			"INSERT INTO pallets (production_date, blocked, product_name)\n" +
+			"VALUES (?, ?, ?, ?)\n";
 		
 		try (PreparedStatement ps = conn.prepareStatement(queryInsert)) {
-			// ps.setDate(1, );
-			// ps.setTime(2, Time.now());
-			ps.setInt(1, 0);
-			ps.setString(2, cookieName);
-			return "added pallet";
+			ps.setDate(1, Date.toString);
+			ps.setBoolean(2, false);
+			ps.setString(3, req.queryParams("cookie"));
+			return ps.toString();
 		} catch (SQLException e) {
 			e.printStackTrace();
 			return "error";
