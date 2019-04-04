@@ -470,6 +470,8 @@ class Database {
 	public String getPallets(Request req, Response res) {
 		//TODO get specific pallet
 		res.type("application/json");
+		
+		if(req.queryParams().size() == 0) {
 		String query = "SELECT pallet_id AS id, product_name AS cookie, production_date AS productionDate, customer_name AS customer, blocked\n"
 			+ "FROM pallets\n";
 
@@ -483,6 +485,59 @@ class Database {
 			e.printStackTrace();
 		}
 		return "";
+		}
+		else {
+			String cookie_name = "";
+			Boolean blocked = false;
+			LocalDate after = null;
+			LocalDate before = null; 
+			
+			boolean whereAdded = false;
+			
+			String query = "SELECT pallet_id AS id, product_name AS cookie, production_date AS productionDate, customer_name AS customer, blocked\n"
+					+ "FROM pallets\n";
+
+			
+			if(req.queryParams("cookie") != null) {
+				cookie_name = req.queryParams("cookie");
+				query = query + " WHERE product_name = " + cookie_name;
+				whereAdded = true;
+			}
+			if(req.queryParams("blocked") != null) {
+				blocked = req.queryParams("blocked");
+				if(!whereAdded) {
+					query = query + "WHERE blocked = " + blocked;
+					whereAdded = true;
+				}
+				else {
+					query = query + "AND blocked = " + blocked;
+				}
+				
+			}
+			//BEFORE AND AFTER NOT FINISHED
+			if(req.queryParams("after") != null) {
+				after = req.queryParams("after");
+				if(!whereAdded) {
+					query = query + "WHERE";
+					whereAdded = true;
+				}
+				else {
+					query = query + "AND";
+				}
+
+			if(req.queryParams("before") != null) {
+				before = req.queryParams("before");
+				if(!whereAdded) {
+					query = query + "WHERE";
+					whereAdded = true;
+				}
+				else {
+					query = query + "AND;
+				}
+			}
+			
+			
+		}
 	}
 	
 	public String blockPallets(Request req, Response res) {
