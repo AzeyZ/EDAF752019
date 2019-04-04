@@ -387,52 +387,52 @@ class Database {
 		// Recipes are described for 100 cookies
 		res.type("application/json");
 		
-		String product_name = "";
-		
-		String queryFindCookie = 
-		    "SELECT product_name\n" +
-		    "FROM products\n" +
-		    "WHERE product_name = ?";
-		try (PreparedStatement ps = conn.prepareStatement(queryFindCookie)) {
-			ps.setString(1, req.queryParams("cookie"));
-			ResultSet rs = ps.executeQuery();
-			product_name = rs.getString(1);
-		} catch (SQLException e) {
-			e.printStackTrace();
-			return "error";
-		}
-		if (product_name.equals("")) {
-			return "No such cookie";
-		}
-		
-		int amount;
-		int used_amount;
-		String queryCompareIngredient = 
-		    "SELECT amount, used_amount, ingredient\n" + 
-		    "FROM used_materials\n" +
-		    "JOIN materials\n" + 
-		    "USING ingredient\n" +
-		    "WHERE product_name = ?";
-		
-		try (PreparedStatement ps = conn.prepareStatement(queryCompareIngredient)) {
-			ps.setString(1, req.queryParams("cookie"));
-			ResultSet rs = ps.executeQuery();
-			
-			while (true) {
-				amount = rs.getInt(1);
-				used_amount = rs.getInt(2);
-				if (used_amount > amount) {
-					return "Not enough ingredients!";
-				}
-				
-				if (!rs.next()) {
-					break;
-				}
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-			return "error";
-		}
+//		String product_name = "";
+//		
+//		String queryFindCookie = 
+//		    "SELECT product_name\n" +
+//		    "FROM products\n" +
+//		    "WHERE product_name = ?";
+//		try (PreparedStatement ps = conn.prepareStatement(queryFindCookie)) {
+//			ps.setString(1, req.queryParams("cookie"));
+//			ResultSet rs = ps.executeQuery();
+//			product_name = rs.getString(1);
+//		} catch (SQLException e) {
+//			e.printStackTrace();
+//			return "error";
+//		}
+//		if (product_name.equals("")) {
+//			return "No such cookie";
+//		}
+//		
+//		int amount;
+//		int used_amount;
+//		String queryCompareIngredient = 
+//		    "SELECT amount, used_amount, ingredient\n" + 
+//		    "FROM used_materials\n" +
+//		    "JOIN materials\n" + 
+//		    "USING ingredient\n" +
+//		    "WHERE product_name = ?";
+//		
+//		try (PreparedStatement ps = conn.prepareStatement(queryCompareIngredient)) {
+//			ps.setString(1, req.queryParams("cookie"));
+//			ResultSet rs = ps.executeQuery();
+//			
+//			while (true) {
+//				amount = rs.getInt(1);
+//				used_amount = rs.getInt(2);
+//				if (used_amount > amount) {
+//					return "Not enough ingredients!";
+//				}
+//				
+//				if (!rs.next()) {
+//					break;
+//				}
+//			}
+//		} catch (SQLException e) {
+//			e.printStackTrace();
+//			return "error";
+//		}
 		
 		// If no returns above we insert a pallet
 		// Have to add fields for production date and time (how?)
@@ -441,13 +441,14 @@ class Database {
 		
 		String queryInsert = 
 			"INSERT INTO pallets (production_date, blocked, product_name)\n" +
-			"VALUES (?, ?, ?, ?)\n";
+			"VALUES (?, ?, ?)\n";
 		
 		try (PreparedStatement ps = conn.prepareStatement(queryInsert)) {
-			ps.setDate(1, Date.toString);
+			ps.setString(1, date.toString());
 			ps.setBoolean(2, false);
 			ps.setString(3, req.queryParams("cookie"));
-			return ps.toString();
+			ps.executeUpdate();
+			return "";
 		} catch (SQLException e) {
 			e.printStackTrace();
 			return "error";

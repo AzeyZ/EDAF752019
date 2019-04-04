@@ -46,7 +46,7 @@ PRIMARY KEY (ingredient, buy_amount, buy_date, buy_time)
 );
 
 CREATE TABLE pallets (
-pallet_id TEXT DEFAULT (lower(hex(randomblob()))),
+pallet_id TEXT DEFAULT (lower(hex(randomblob(16)))),
 production_date TEXT,
 produection_time TEXT,
 blocked BOOLEAN,
