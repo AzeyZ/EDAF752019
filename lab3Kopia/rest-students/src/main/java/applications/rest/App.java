@@ -33,7 +33,7 @@ public class App {
 		get("/pallets", (req, res) -> db.getPallets(req, res));
 		post("/pallets", (req, res) -> db.addPallet(req, res));
 		post("/block/*/*/*", (req, res) -> db.blockPallets(req, res));
-//		post("/unblock/:cookie-name/:from-date/:to-date"), (req, res) -> db.unBlockPallets(req, res));
+		post("/unblock/*/*/*", (req, res) -> db.unBlockPallets(req, res));
 
 		
 		// post("/performances", (req, res) -> db.addPerformance(req, res));
@@ -160,7 +160,7 @@ class Database {
 	// Adds all the spciified materials in reset
 	private void addMaterials () {
 		newMaterial("Flour", 100000, "g");
-		newMaterial("Butter", 100000, "g");
+		newMaterial("Butter", 100000, "g"); 
 		newMaterial("Icing sugar", 100000, "g");
 		newMaterial("Roasted, chopped nuts", 100000, "g");
 		newMaterial("Fine-ground nuts", 100000, "g");
@@ -384,57 +384,51 @@ class Database {
 		// Compare with "getMovies" in lab 3
 		// Each pallet contains 15*10*36=5400 cookies
 		// Recipes are described for 100 cookies
-//		
-//		String product_name = "";
-//		
-//		String queryFindCookie = 
-//		    "SELECT product_name\n" +
-//		    "FROM products\n" +
-//		    "WHERE product_name = ?";
-//		try (PreparedStatement ps = conn.prepareStatement(queryFindCookie)) {
-//			ps.setString(1, req.queryParams("cookie"));
-//			ResultSet rs = ps.executeQuery();
-//			product_name = rs.getString(1);
-//		} catch (SQLException e) {
-//			e.printStackTrace();
-//			return "No such cookie";
-//		}
-//		if (product_name.equals("")) {
-//			return "No such cookie";
-//		}
-//		
-//		return ""; // Comment this out later
-//		
-////		int amount;
-////		int used_amount;
-////		String queryCompareIngredient = 
-////		    "SELECT amount, used_amount, ingredient\n" + 
-////		    "FROM used_materials\n" +
-////		    "JOIN materials\n" + 
-////		    "USING (ingredient)\n" +
-////		    "WHERE product_name = ?";
-////		
-////		try (PreparedStatement ps = conn.prepareStatement(queryCompareIngredient)) {
-////			ps.setString(1, req.queryParams("cookie"));
-////			ResultSet rs = ps.executeQuery();
-////			
-////			while (true) {
-////				amount = rs.getInt(1);
-////				used_amount = rs.getInt(2);
-////				if (used_amount > amount) {
-////					return "Not enough ingredients!";
-////				}
-////				
-////				if (!rs.next()) {
-////					break;
-////				}
-////			}
-////		} catch (SQLException e) {
-////			e.printStackTrace();
-////			return "error";
-////		}
-		
+
 		res.type("application/json");
+		
+		String cookie_name = req.queryParams("cookie");
+		String queryFindCookie = "SELECT * FROM products WHERE product_name = ?";
+		try (PreparedStatement ps = conn.prepareStatement(queryFindCookie)) {
+			ps.setString(1,  cookie_name);
+			ResultSet rs = ps.executeQuery();
+
+			if(rs.isClosed()) {
+				return "cookie not found";
+			}
+		
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		int amount;
+		int used_amount;
+		String queryCompareIngredient = 
+		    "SELECT amount, used_amount, ingredient\n" + 
+		    "FROM used_materials\n" +
+		    "JOIN materials\n" + 
+		    "USING (ingredient)\n" +
+		    "WHERE product_name = ?";
+		
+		try (PreparedStatement ps = conn.prepareStatement(queryCompareIngredient)) {
+			ps.setString(1, cookie_name);
+			ResultSet rs = ps.executeQuery();
+			
+			while (true) {
+				amount = rs.getInt(1);
+				used_amount = rs.getInt(2);
+				if (used_amount > amount) {
+					return "Not enough ingredients!";
+				}
+				
+				if (!rs.next()) {
+					break;
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return "error";
+		}
 		
 		// If no returns above we insert a pallet
 		// Have to add fields for production date and time (how?)
@@ -450,7 +444,7 @@ class Database {
 			ps.setBoolean(2, false);
 			ps.setString(3, req.queryParams("cookie"));
 			ps.executeUpdate();
-			return "";
+			return "added " + cookie_name; //TODO fix print
 		} catch (SQLException e) {
 			e.printStackTrace();
 			return "error";
@@ -458,6 +452,7 @@ class Database {
 	}
 	
 	public String getPallets(Request req, Response res) {
+		//TODO get specific pallet
 		res.type("application/json");
 		String query = "SELECT pallet_id AS id, product_name AS cookie, production_date AS productionDate, customer_name AS customer, blocked\n"
 			+ "FROM pallets\n";
@@ -475,7 +470,6 @@ class Database {
 	}
 	
 	public String blockPallets(Request req, Response res) {
-//TODO FINISH METHOD
 		res.type("application/json");
 		String cookie_name = req.splat()[0];
 		String from_date = req.splat()[1];
@@ -485,19 +479,30 @@ class Database {
 				ps.setString(1, cookie_name);
 				ps.setString(2, to_date);
 				ps.setString(3, from_date);
-				ResultSet rs = ps.executeQuery();
-				String result = JSONizer.toJSON(rs, "Found pallets");
-				res.status(200);
-				res.body(result);
-				return result;
+				ps.executeUpdate();
+				return "blocked";
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
-			return "";
+			return "failed";
 		}
 	
 	public String unBlockPallets(Request req, Response res) {
-		return "";
+		res.type("application/json");
+		String cookie_name = req.splat()[0];
+		String from_date = req.splat()[1];
+		String to_date = req.splat()[2];
+		String queryUpdate = "UPDATE pallets SET blocked = false WHERE product_name = ? AND production_date <= ? AND production_date >= ? ";
+			try (PreparedStatement ps = conn.prepareStatement(queryUpdate)) {
+				ps.setString(1, cookie_name);
+				ps.setString(2, to_date);
+				ps.setString(3, from_date);
+				ps.executeUpdate();
+				return "unblocked";
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+			return "failed";
 	}
 
 	public String addTicket(Request req, Response res) {
