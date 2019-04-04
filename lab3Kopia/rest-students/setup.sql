@@ -49,7 +49,7 @@ CREATE TABLE pallets (
 pallet_id TEXT DEFAULT (lower(hex(randomblob()))),
 production_date DATE,
 produection_time TIME,
-blocked INT,
+blocked BOOLEAN,
 product_name TEXT,
 customer_name TEXT,
 delivery_date DATE,
