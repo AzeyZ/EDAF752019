@@ -384,8 +384,7 @@ class Database {
 		// Compare with "getMovies" in lab 3
 		// Each pallet contains 15*10*36=5400 cookies
 		// Recipes are described for 100 cookies
-		res.type("application/json");
-		
+//		
 //		String product_name = "";
 //		
 //		String queryFindCookie = 
@@ -398,40 +397,44 @@ class Database {
 //			product_name = rs.getString(1);
 //		} catch (SQLException e) {
 //			e.printStackTrace();
-//			return "error";
+//			return "No such cookie";
 //		}
 //		if (product_name.equals("")) {
 //			return "No such cookie";
 //		}
 //		
-//		int amount;
-//		int used_amount;
-//		String queryCompareIngredient = 
-//		    "SELECT amount, used_amount, ingredient\n" + 
-//		    "FROM used_materials\n" +
-//		    "JOIN materials\n" + 
-//		    "USING ingredient\n" +
-//		    "WHERE product_name = ?";
+//		return ""; // Comment this out later
 //		
-//		try (PreparedStatement ps = conn.prepareStatement(queryCompareIngredient)) {
-//			ps.setString(1, req.queryParams("cookie"));
-//			ResultSet rs = ps.executeQuery();
-//			
-//			while (true) {
-//				amount = rs.getInt(1);
-//				used_amount = rs.getInt(2);
-//				if (used_amount > amount) {
-//					return "Not enough ingredients!";
-//				}
-//				
-//				if (!rs.next()) {
-//					break;
-//				}
-//			}
-//		} catch (SQLException e) {
-//			e.printStackTrace();
-//			return "error";
-//		}
+////		int amount;
+////		int used_amount;
+////		String queryCompareIngredient = 
+////		    "SELECT amount, used_amount, ingredient\n" + 
+////		    "FROM used_materials\n" +
+////		    "JOIN materials\n" + 
+////		    "USING (ingredient)\n" +
+////		    "WHERE product_name = ?";
+////		
+////		try (PreparedStatement ps = conn.prepareStatement(queryCompareIngredient)) {
+////			ps.setString(1, req.queryParams("cookie"));
+////			ResultSet rs = ps.executeQuery();
+////			
+////			while (true) {
+////				amount = rs.getInt(1);
+////				used_amount = rs.getInt(2);
+////				if (used_amount > amount) {
+////					return "Not enough ingredients!";
+////				}
+////				
+////				if (!rs.next()) {
+////					break;
+////				}
+////			}
+////		} catch (SQLException e) {
+////			e.printStackTrace();
+////			return "error";
+////		}
+		
+		res.type("application/json");
 		
 		// If no returns above we insert a pallet
 		// Have to add fields for production date and time (how?)
