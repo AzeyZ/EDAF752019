@@ -38,22 +38,28 @@ PRIMARY KEY (used_amount, ingredient, product_name)
 
 CREATE TABLE restocks (
 buy_amount INT,
-buy_date TEXT,
-buy_time TEXT,
+buy_date DATE,
+buy_time TIME,
 ingredient TEXT,
 FOREIGN KEY (ingredient) REFERENCES materials (ingredient),
 PRIMARY KEY (ingredient, buy_amount, buy_date, buy_time)
 );
 
 CREATE TABLE pallets (
+<<<<<<< HEAD
 pallet_id TEXT DEFAULT (lower(hex(randomblob(16)))),
 production_date TEXT,
 produection_time TEXT,
+=======
+pallet_id TEXT DEFAULT (lower(hex(randomblob()))),
+production_date DATE,
+produection_time TIME,
+>>>>>>> b5982bc24bd4b104813036dde9dd02e320b23fcd
 blocked BOOLEAN,
 product_name TEXT,
 customer_name TEXT,
-delivery_date TEXT,
-delivery_time TEXT,
+delivery_date DATE,
+delivery_time TIME,
 FOREIGN KEY (customer_name) REFERENCES customers (name),
 FOREIGN KEY (product_name) REFERENCES products (product_name),
 FOREIGN KEY (delivery_date) REFERENCES delivieries (delivery_date),
@@ -62,8 +68,8 @@ PRIMARY KEY (pallet_id)
 );
 
 CREATE TABLE deliveries (
-delivery_date TEXT,
-delivery_time TEXT,
+delivery_date DATE,
+delivery_time TIME,
 customer_name TEXT,
 pallet_id TEXT,
 -- Might want to add delivery id?
@@ -78,8 +84,8 @@ address TEXT
 );
 
 CREATE TABLE orders (
-due_date TEXT,
-due_time TEXT,
+due_date DATE,
+due_time TIME,
 product_name TEXT,
 customer_name TEXT,
 FOREIGN KEY (product_name) REFERENCES products (product_name),

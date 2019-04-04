@@ -32,9 +32,8 @@ public class App {
 		get("/recipes", (req, res) -> db.getRecipes(req, res));
 		get("/pallets", (req, res) -> db.getPallets(req, res));
 		post("/pallets", (req, res) -> db.addPallet(req, res));
-		
-// 		post("/block", (req, res) -> db.block(req, res)); //TODO
-//		post("/unblock", (req, res) -> db.unblock(req, res)); //TODO
+		post("/block/*/*/*", (req, res) -> db.blockPallets(req, res));
+//		post("/unblock/:cookie-name/:from-date/:to-date"), (req, res) -> db.unBlockPallets(req, res));
 
 		
 		// post("/performances", (req, res) -> db.addPerformance(req, res));
@@ -469,6 +468,32 @@ class Database {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+		return "";
+	}
+	
+	public String blockPallets(Request req, Response res) {
+//TODO FINISH METHOD
+		res.type("application/json");
+		String cookie_name = req.splat()[0];
+		String from_date = req.splat()[1];
+		String to_date = req.splat()[2];
+		String queryUpdate = "UPDATE pallets SET blocked = true WHERE product_name = ? AND production_date <= ? AND production_date >= ? ";
+			try (PreparedStatement ps = conn.prepareStatement(queryUpdate)) {
+				ps.setString(1, cookie_name);
+				ps.setString(2, to_date);
+				ps.setString(3, from_date);
+				ResultSet rs = ps.executeQuery();
+				String result = JSONizer.toJSON(rs, "Found pallets");
+				res.status(200);
+				res.body(result);
+				return result;
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+			return "";
+		}
+	
+	public String unBlockPallets(Request req, Response res) {
 		return "";
 	}
 
