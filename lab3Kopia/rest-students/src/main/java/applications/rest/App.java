@@ -452,7 +452,6 @@ class Database {
 	}
 	
 	public String getPallets(Request req, Response res) {
-		//TODO get specific pallet
 		res.type("application/json");
 		
 		if(req.queryParams().size() == 0) {
@@ -472,11 +471,17 @@ class Database {
 		}
 		else {
 			String cookie_name = "";
-			Boolean blocked = false;
-			LocalDate after = null;
-			LocalDate before = null; 
+			String blocked = "";
+			String after = "";
+			String before = ""; 
 			
 			boolean whereAdded = false;
+			boolean cookieFirst = false;
+			boolean blockedFirst = false;
+			boolean afterFirst = false;
+			boolean blockedSecond = false;
+			boolean afterSecond = false;
+			boolean afterThird = false;
 			
 			String query = "SELECT pallet_id AS id, product_name AS cookie, production_date AS productionDate, customer_name AS customer, blocked\n"
 					+ "FROM pallets\n";
@@ -484,49 +489,126 @@ class Database {
 			
 			if(req.queryParams("cookie") != null) {
 				cookie_name = req.queryParams("cookie");
-				query = query + " WHERE product_name = " + cookie_name;
+				query = query + " WHERE product_name = ? ";
 				whereAdded = true;
+				cookieFirst = true;
 			}
+			
 			if(req.queryParams("blocked") != null) {
-				if(req.queryParams("blocked").equals("true") || req.queryParams("blocked").equals("1")) {
-					blocked = true;
+				if(req.queryParams("blocked").equals("1")) {
+					blocked = "1";
 				}
 				else
 				{
-					blocked = false;
+					blocked = "0";
 				}
 				if(!whereAdded) {
-					query = query + "WHERE blocked = " + blocked;
+					query = query + "WHERE blocked = ? ";
 					whereAdded = true;
+					blockedFirst = true;
 				}
 				else {
-					query = query + "AND blocked = " + blocked;
+					query = query + "AND blocked = ? ";
+					blockedSecond = true;
 				}
 				
 			}
-			//BEFORE AND AFTER NOT FINISHED
+			
 			if(req.queryParams("after") != null) {
-				after = LocalDate.parse(req.queryParams("after"));
+				after = req.queryParams("after");
 				if(!whereAdded) {
-					query = query + "WHERE production_date > " + after;
+					query = query + "WHERE production_date > ? ";
 					whereAdded = true;
+					afterFirst = true;
 				}
 				else {
-					query = query + "AND production_date > " + after;
-				}
-
-			if(req.queryParams("before") != null) {
-				before = LocalDate.parse(req.queryParams("before"));
-				if(!whereAdded) {
-					query = query + "WHERE WHERE production_date < " + before;
-					whereAdded = true;
-				}
-				else {
-					query = query + "AND production_date < " + before;
+					query = query + "AND production_date > ? ";
+					afterSecond = true;
+					if(blockedSecond) {
+						afterThird = true;
+					}
 				}
 			}
-			
-			
+			if(req.queryParams("before") != null) {
+				before = req.queryParams("before");
+				if(!whereAdded) {
+					query = query + "WHERE production_date < ? ";
+				}
+				else {
+					query = query + "AND production_date < ? ";
+					if(blockedSecond) {
+						afterThird = false;
+					}
+				}
+			}			
+		
+			try (PreparedStatement ps = conn.prepareStatement(query)) {
+				
+				System.out.println(cookieFirst + "cookieFirst");
+				System.out.println(blockedFirst + "blockedFirst");
+				System.out.println(afterFirst+ "afterFirst");
+				System.out.println(blockedSecond+ "blockedSecond");
+				System.out.println(afterSecond + "afterSecond");
+				System.out.println(afterThird+ "afterThird");
+				
+			if(req.queryParams().size() == 4) {
+				ps.setString(1, cookie_name);
+				ps.setString(2, blocked);
+				ps.setString(3, after);
+				ps.setString(4, before);			
+			}
+			else if(req.queryParams().size() == 1) {
+				if(cookie_name != "") {
+					ps.setString(1, cookie_name);
+				}
+				else if(blocked != "") {
+					ps.setString(1, blocked);
+				}
+				else if(after != "") {
+					ps.setString(1, after);
+				}
+				else if(before != "") {
+					ps.setString(1, before);
+				}
+			}
+			else {
+					
+				if(cookieFirst) {
+					ps.setString(1, cookie_name);
+				}
+				else if(blockedFirst) {
+					ps.setString(1, blocked);
+				}
+				else if(afterFirst) {
+					ps.setString(1, after);
+				}
+				else {
+					ps.setString(1, before);
+				}
+				if(blockedSecond) {
+					ps.setString(2, blocked);
+				}
+				else if(afterSecond) {
+					ps.setString(2, after);
+				}
+				else {
+					ps.setString(2, before);
+				}
+				if(req.queryParams().size() == 3) {	
+					if(afterThird) {
+						ps.setString(3, after);
+					}
+					else {
+						ps.setString(3, before);
+					}
+				}
+			}			
+			ResultSet rs = ps.executeQuery();
+			String result = JSONizer.toJSON(rs, "pallets");
+			res.status(200);
+			return result;
+		} catch (SQLException e) {
+			e.printStackTrace();
 		}
 	}
 		return "";
