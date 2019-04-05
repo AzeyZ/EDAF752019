@@ -34,7 +34,8 @@ unit TEXT,
 FOREIGN KEY (unit) REFERENCES materials (unit),
 FOREIGN KEY (ingredient) REFERENCES materials (ingredient),
 FOREIGN KEY (product_name) REFERENCES products (product_name),
-PRIMARY KEY (used_amount, ingredient, product_name)
+-- PRIMARY KEY (used_amount, ingredient, product_name)
+PRIMARY KEY (ingredient, product_name)
 );
 
 CREATE TABLE restocks (
@@ -87,7 +88,3 @@ FOREIGN KEY (product_name) REFERENCES products (product_name),
 FOREIGN KEY (customer_name) REFERENCES customers (name),
 PRIMARY KEY (due_date, due_time, product_name, customer_name)
 );
-
--- We should create a trigger:
--- When we add a pallet,
--- Remove materials corresponding 5400 cookies of that kind

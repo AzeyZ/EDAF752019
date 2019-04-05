@@ -51,7 +51,7 @@ class Database {
 	 * The database connection.
 	 */
 	private Connection conn;
-	private PasswordHashGenerator passGen;
+	// private PasswordHashGenerator passGen;
 
 	/**
 	 * Creates the database interface object. Connection to the database is
@@ -384,10 +384,31 @@ class Database {
 		// Compare with "getMovies" in lab 3
 		// Each pallet contains 15*10*36=5400 cookies
 		// Recipes are described for 100 cookies
+		// 54 recipes / pallet
 
 		res.type("application/json");
 		
 		String cookie_name = req.queryParams("cookie");
+		
+		if (findCookie(req, res, cookie_name).equals("cookie not found"))
+			return findCookie(req, res, cookie_name);
+		
+		if (compareIngredients(req, res, cookie_name).equals("error") || compareIngredients(req, res, cookie_name).equals("Not enough ingredients!"))
+			return compareIngredients(req, res, cookie_name);
+		
+		// If no returns above we insert a pallet
+		if (insertPallet(req, res, cookie_name).equals("error"))
+			return insertPallet(req, res, cookie_name);
+		
+		// Find ingredients and how much are used for specified cookie
+		// Update values in materials
+		if (updateMaterials(req, res, cookie_name).equals("Update values failed!") || updateMaterials(req, res, cookie_name).equals("getValues failed"))
+			return updateMaterials(req, res, cookie_name);
+			
+		return "Cookie added!";
+	}
+	
+	private String findCookie(Request req, Response res, String cookie_name) {
 		String queryFindCookie = "SELECT * FROM products WHERE product_name = ?";
 		try (PreparedStatement ps = conn.prepareStatement(queryFindCookie)) {
 			ps.setString(1,  cookie_name);
@@ -396,11 +417,15 @@ class Database {
 			if(rs.isClosed()) {
 				return "cookie not found";
 			}
-		
+			
+			return "cookie found";
 		} catch (SQLException e) {
 			e.printStackTrace();
+			return "cookie not found";
 		}
-
+	}
+	
+	private String compareIngredients (Request req, Response res, String cookie_name) {
 		int amount;
 		int used_amount;
 		String queryCompareIngredient = 
@@ -417,7 +442,7 @@ class Database {
 			while (true) {
 				amount = rs.getInt(1);
 				used_amount = rs.getInt(2);
-				if (used_amount > amount) {
+				if ((used_amount * 54) > amount) {
 					return "Not enough ingredients!";
 				}
 				
@@ -425,14 +450,15 @@ class Database {
 					break;
 				}
 			}
+			
+			return "Enough ingredients!";
 		} catch (SQLException e) {
 			e.printStackTrace();
 			return "error";
 		}
-		
-		// If no returns above we insert a pallet
-		// Have to add fields for production date and time (how?)
-		
+	}
+	
+	private String insertPallet (Request req, Response res, String cookie_name) {
 		LocalDate date = LocalDate.now();
 		
 		String queryInsert = 
@@ -442,12 +468,59 @@ class Database {
 		try (PreparedStatement ps = conn.prepareStatement(queryInsert)) {
 			ps.setString(1, date.toString());
 			ps.setBoolean(2, false);
-			ps.setString(3, req.queryParams("cookie"));
+			ps.setString(3, cookie_name);
 			ps.executeUpdate();
 			return "added " + cookie_name; //TODO fix print
 		} catch (SQLException e) {
 			e.printStackTrace();
 			return "error";
+		}
+	}
+	
+	private String updateMaterials (Request req, Response res, String cookie_name) {
+		ArrayList<String> ingredients = new ArrayList<String>();
+		ArrayList<Integer> usedAmounts = new ArrayList<Integer>();
+		
+		String queryGetUsedValues = 
+			"SELECT used_amount, ingredient, product_name\n" +
+		    "FROM used_materials\n" +
+			"WHERE product_name = ?";
+		
+		try (PreparedStatement ps = conn.prepareStatement(queryGetUsedValues)) {
+			ps.setString(1, cookie_name);
+			ResultSet rs = ps.executeQuery();
+			
+			while (true) {		
+				ingredients.add(rs.getString(2));
+				usedAmounts.add(new Integer(rs.getInt(1)));
+				
+				if (!rs.next()) {
+					break;
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return "getValues failed";
+		}
+		
+		System.out.println(usedAmounts.size());
+		
+		String queryUpdateMaterials = 
+			"UPDATE materials\n" + 
+		    "SET amount = amount - (? * 54)\n" +
+			"WHERE ingredient = ?";
+		try (PreparedStatement ps = conn.prepareStatement(queryUpdateMaterials)) {
+			int index = 0;
+			while (index < usedAmounts.size()) {
+				ps.setInt(1, usedAmounts.get(index));
+				ps.setString(2, ingredients.get(index));
+				ps.executeUpdate();
+				index++;
+			}
+			return "Cookie added!";
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return "Update values failed!";
 		}
 	}
 	
@@ -566,207 +639,6 @@ class Database {
 				e.printStackTrace();
 			}
 			return "error";
-	}
-
-	public String addTicket(Request req, Response res) {
-		int remaining_seats = 0;
-		String screening_time = "";
-		String screening_date = "";
-		String theater_name = "";
-		String ticketID = "tes";
-		String queryFindRemaningSeats = "SELECT remaining_seats, screening_time, screening_date, theater_name\n"
-				+ "FROM screenings\n" + "WHERE screening_id = ?";
-		try (PreparedStatement ps = conn.prepareStatement(queryFindRemaningSeats)) {
-			ps.setString(1, req.queryParams("performance"));
-			ResultSet rs = ps.executeQuery();
-			remaining_seats = rs.getInt(1);
-			screening_time = rs.getString(2);
-			screening_date = rs.getString(3);
-			theater_name = rs.getString(4);
-		} catch (SQLException e) {
-			e.printStackTrace();
-			return "Error";
-		}
-		if (remaining_seats <= 0) {
-			return "No tickets left";
-		}
-		String queryPassword = "SELECT pass_word\n" + "FROM customers\n" + "WHERE user_name = ?";
-		try {
-			PreparedStatement ps = conn.prepareStatement(queryPassword);
-			ps.setString(1, req.queryParams("user"));
-			ResultSet rs = ps.executeQuery();
-			if (!rs.getString(1).equals(passGen.hash(req.queryParams("pwd")))) {
-				return "Wrong password";
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-			return "Error";
-		}
-		String queryTicket = "INSERT INTO tickets (user_name, screening_time, screening_date, theater_name)\n"
-				+ "VALUES  (?, ?, ?, ?)\n";
-
-		try (PreparedStatement ps = conn.prepareStatement(queryTicket)) {
-			ps.setString(1, req.queryParams("user"));
-			ps.setString(2, screening_time);
-			ps.setString(3, screening_date);
-			ps.setString(4, theater_name);
-			ps.executeUpdate();
-		} catch (SQLException e) {
-			e.printStackTrace();
-			return "Error";
-		}
-
-		String queryUpdate = "UPDATE screenings \n" + "SET remaining_seats = ?\n" + "WHERE screening_id = ?";
-
-		try (PreparedStatement ps = conn.prepareStatement(queryUpdate)) {
-			remaining_seats--;
-			ps.setInt(1, remaining_seats);
-			ps.setString(2, req.queryParams("performance"));
-			ps.executeUpdate();
-		} catch (SQLException e) {
-			e.printStackTrace();
-			return "ErrorInsert";
-		}
-		String queryFindId = "SELECT ticket_id\n" + "FROM tickets\n" + "WHERE rowid = last_insert_rowid()";
-		try (PreparedStatement ps2 = conn.prepareStatement(queryFindId)) {
-			ResultSet rs = ps2.executeQuery();
-			ticketID = rs.getString(1);
-		} catch (SQLException e) {
-			e.printStackTrace();
-			return "caught3";
-		}
-		return "/ticket/" + ticketID;
-
-	}
-
-	public String addPerformance(Request req, Response res) {
-		String performanceID = "error";
-		String title = "test";
-		int capacity_new = 0;
-		int year = 666;
-		res.type("application/json");
-		String queryPerformance = "INSERT INTO screenings (screening_time, screening_date, production_year, movie_name, theater_name, remaining_seats)\n"
-				+ "VALUES (?,?,?,?,?,?)";
-		String queryFind = "SELECT production_year, movie_name \n" + "FROM movies\n" + "WHERE imdb_key = ?";
-		String queryFindTheater = "SELECT capacity\n" + "FROM theaters\n" + "WHERE theater_name = ?";
-
-		try (PreparedStatement ps = conn.prepareStatement(queryFind)) {
-			ps.setString(1, req.queryParams("imdb"));
-			ResultSet rs = ps.executeQuery();
-			year = rs.getInt(1);
-			title = rs.getString(2);
-		} catch (SQLException e) {
-			e.printStackTrace();
-			return "No such movie or theater";
-		}
-		try (PreparedStatement ps = conn.prepareStatement(queryFindTheater)) {
-			ps.setString(1, req.queryParams("theater"));
-			ResultSet rs = ps.executeQuery();
-			capacity_new = rs.getInt(1);
-		} catch (SQLException e) {
-			e.printStackTrace();
-			return "No such movie or theater";
-		}
-
-		try (PreparedStatement ps = conn.prepareStatement(queryPerformance)) {
-			ps.setString(1, req.queryParams("time"));
-			ps.setString(2, req.queryParams("date"));
-			ps.setInt(3, year);
-			ps.setString(4, title);
-			ps.setString(5, req.queryParams("theater"));
-			ps.setInt(6, capacity_new);
-		} catch (SQLException e) {
-			e.printStackTrace();
-			return "#369_multiple_error?";
-		}
-		String queryFindId = "SELECT screening_id \n" + "FROM screenings\n"
-				+ "WHERE theater_name = ? AND screening_date = ? AND screening_time = ?";
-		try (PreparedStatement ps2 = conn.prepareStatement(queryFindId)) {
-			ps2.setString(1, req.queryParams("theater"));
-			ps2.setString(2, req.queryParams("date"));
-			ps2.setString(3, req.queryParams("time"));
-			ResultSet rs = ps2.executeQuery();
-			performanceID = rs.getString(1);
-		} catch (SQLException e) {
-			e.printStackTrace();
-			return "caught3";
-		}
-		return "/performances/" + performanceID;
-	}
-
-	public String getPerformances(Request req, Response res) {
-
-		res.type("application/json");
-		String query = "SELECT *\n" + "FROM screenings\n";
-
-		try (PreparedStatement ps = conn.prepareStatement(query)) {
-			ResultSet rs = ps.executeQuery();
-			String result = JSONizer.toJSON(rs, "data");
-			res.status(200);
-			res.body(result);
-			return result;
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		return "OK \n";
-	}
-
-	public String getMovies(Request req, Response res) {
-		if (req.queryParams().size() == 2) {
-			String title = req.queryParams("title");
-			int year = Integer.parseInt(req.queryParams("year"));
-			String query = "SELECT imdb_key AS imdbKey, movie_name AS title, production_year AS year \n"
-					+ "FROM movies \n" + "WHERE movie_name = ? AND production_year = ? \n";
-
-			try (PreparedStatement ps = conn.prepareStatement(query)) {
-
-				ps.setString(1, title);
-				ps.setInt(2, year);
-				ResultSet rs = ps.executeQuery();
-				String result = JSONizer.toJSON(rs, "data");
-				res.status(200);
-				res.body(result);
-				return result;
-			} catch (SQLException e) {
-				e.printStackTrace();
-				return query;
-
-			}
-		} else {
-			res.type("application/json");
-			String query = "SELECT imdb_key AS imdbKey, movie_name AS title, production_year AS year \n"
-					+ "FROM movies \n";
-			try {
-				PreparedStatement ps = conn.prepareStatement(query);
-				ResultSet rs = ps.executeQuery();
-				String result = JSONizer.toJSON(rs, "data");
-				res.status(200);
-				res.body(result);
-				return result;
-
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-			return "";
-		}
-	}
-
-}
-
-/**
- * Auxiliary class for automatically translating a ResultSet to JSON
- */
-class PasswordHashGenerator {
-
-	public static String hash(String text) {
-		try {
-			MessageDigest md = MessageDigest.getInstance("SHA-256");
-			md.update(text.getBytes(StandardCharsets.UTF_8));
-			byte[] digest = md.digest();
-			return String.format("%064x", new BigInteger(1, digest));
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
 	}
 }
 
