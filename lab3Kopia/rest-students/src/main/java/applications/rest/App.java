@@ -488,7 +488,13 @@ class Database {
 				whereAdded = true;
 			}
 			if(req.queryParams("blocked") != null) {
-				blocked = req.queryParams("blocked");
+				if(req.queryParams("blocked").equals("true") || req.queryParams("blocked").equals("1")) {
+					blocked = true;
+				}
+				else
+				{
+					blocked = false;
+				}
 				if(!whereAdded) {
 					query = query + "WHERE blocked = " + blocked;
 					whereAdded = true;
@@ -500,28 +506,30 @@ class Database {
 			}
 			//BEFORE AND AFTER NOT FINISHED
 			if(req.queryParams("after") != null) {
-				after = req.queryParams("after");
+				after = LocalDate.parse(req.queryParams("after"));
 				if(!whereAdded) {
-					query = query + "WHERE";
+					query = query + "WHERE production_date > " + after;
 					whereAdded = true;
 				}
 				else {
-					query = query + "AND";
+					query = query + "AND production_date > " + after;
 				}
 
 			if(req.queryParams("before") != null) {
-				before = req.queryParams("before");
+				before = LocalDate.parse(req.queryParams("before"));
 				if(!whereAdded) {
-					query = query + "WHERE";
+					query = query + "WHERE WHERE production_date < " + before";
 					whereAdded = true;
 				}
 				else {
-					query = query + "AND;
+					query = query + "AND production_date < " + before;
 				}
 			}
 			
 			
 		}
+	}
+		return "";
 	}
 	
 	public String blockPallets(Request req, Response res) {
@@ -535,11 +543,11 @@ class Database {
 				ps.setString(2, to_date);
 				ps.setString(3, from_date);
 				ps.executeUpdate();
-				return "blocked";
+				return "ok";
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
-			return "failed";
+			return "error";
 		}
 	
 	public String unBlockPallets(Request req, Response res) {
@@ -553,11 +561,11 @@ class Database {
 				ps.setString(2, to_date);
 				ps.setString(3, from_date);
 				ps.executeUpdate();
-				return "unblocked";
+				return "ok";
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
-			return "failed";
+			return "error";
 	}
 
 	public String addTicket(Request req, Response res) {

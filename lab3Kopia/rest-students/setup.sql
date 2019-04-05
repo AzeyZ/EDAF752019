@@ -47,7 +47,6 @@ PRIMARY KEY (ingredient, buy_amount, buy_date, buy_time)
 );
 
 CREATE TABLE pallets (
-<<<<<<< HEAD
 pallet_id TEXT DEFAULT (lower(hex(randomblob(16)))),
 production_date TEXT,
 production_time TEXT,
