@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import java.sql.*;
 import java.sql.Date;
 import java.util.*;
+import org.json.simple.JSONObject;
 import spark.*;
 import static spark.Spark.*;
 import com.google.gson.Gson;
@@ -126,7 +127,10 @@ class Database {
 		
 		// Should return json object with "status" set to "ok"
 		res.status(200);
-		return "ok";
+		
+		JSONObject jo = new JSONObject();
+        jo.put("status", "ok");
+        return jo.toJSONString();
 	}
 	public String blockPallet(Request req, Response res){
 		return null;
@@ -309,8 +313,8 @@ class Database {
 
 	public String getCustomer(Request req, Response res) {
 		res.type("application/json");
-		String query = "SELECT *\n"
-			+ "FROM customers";
+		String query = "SELECT customer_name AS name, address \n"
+			+ "FROM customers ORDER BY customer_name";
 
 		try (PreparedStatement ps = conn.prepareStatement(query)) {
 			ResultSet rs = ps.executeQuery();
@@ -326,7 +330,7 @@ class Database {
 	
 	public String getIngredients(Request req, Response res) {
 		res.type("application/json");
-		String query = "SELECT ingredient, amount, unit\n"
+		String query = "SELECT ingredient AS name, amount AS quantity, unit\n"
 			+ "FROM materials";
 
 		try (PreparedStatement ps = conn.prepareStatement(query)) {
