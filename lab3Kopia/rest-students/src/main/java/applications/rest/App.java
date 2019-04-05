@@ -518,7 +518,7 @@ class Database {
 			if(req.queryParams("before") != null) {
 				before = LocalDate.parse(req.queryParams("before"));
 				if(!whereAdded) {
-					query = query + "WHERE WHERE production_date < " + before";
+					query = query + "WHERE WHERE production_date < " + before;
 					whereAdded = true;
 				}
 				else {
