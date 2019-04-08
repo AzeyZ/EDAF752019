@@ -389,27 +389,42 @@ class Database {
 		// Each pallet contains 15*10*36=5400 cookies
 		// Recipes are described for 100 cookies
 		// 54 recipes / pallet
-
+		
 		res.type("application/json");
+		
+		String palletID;
+		JSONObject jo = new JSONObject();
 		
 		String cookie_name = req.queryParams("cookie");
 		
-		if (findCookie(req, res, cookie_name).equals("cookie not found"))
+		if (findCookie(req, res, cookie_name).equals("cookie not found")) {
+			jo.put("status", "no suck cookie");
 			return findCookie(req, res, cookie_name);
+		}
 		
-		if (compareIngredients(req, res, cookie_name).equals("error") || compareIngredients(req, res, cookie_name).equals("Not enough ingredients!"))
+		if (compareIngredients(req, res, cookie_name).equals("error") || compareIngredients(req, res, cookie_name).equals("Not enough ingredients!")) {
+			jo.put("status", "not enough ingredients");
 			return compareIngredients(req, res, cookie_name);
+		}
 		
 		// If no returns above we insert a pallet
-		if (insertPallet(req, res, cookie_name).equals("error"))
+		if (insertPallet(req, res, cookie_name).equals("error")) {
 			return insertPallet(req, res, cookie_name);
+		}
 		
 		// Find ingredients and how much are used for specified cookie
 		// Update values in materials
 		if (updateMaterials(req, res, cookie_name).equals("Update values failed!") || updateMaterials(req, res, cookie_name).equals("getValues failed"))
 			return updateMaterials(req, res, cookie_name);
+		
+		if (findPalletID(req, res).equals("could not find pallet id"))
+			return findPalletID(req, res);
 			
-		return "Cookie added!";
+		palletID = findPalletID (req, res);
+		
+		jo.put("id", palletID);
+		jo.put("status", "ok");
+		return jo.toString();
 	}
 	
 	private String findCookie(Request req, Response res, String cookie_name) {
@@ -525,6 +540,20 @@ class Database {
 		} catch (SQLException e) {
 			e.printStackTrace();
 			return "Update values failed!";
+		}
+	}
+	
+	private String findPalletID (Request req, Response res) {
+		String queryFindPallet = 
+			"SELECT pallet_id\n" +
+			"FROM pallets\n" +
+			"WHERE rowid = last_insert_rowid()";
+		try (PreparedStatement ps = conn.prepareStatement(queryFindPallet)) {
+			ResultSet rs = ps.executeQuery();
+			return rs.getString(1);
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return "could not find pallet id";
 		}
 	}
 	
