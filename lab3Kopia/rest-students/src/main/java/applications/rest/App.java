@@ -385,12 +385,12 @@ class Database {
 	}
 	
 	public String addPallet (Request req, Response res) {
+		res.type("application/json");
+		
 		// Compare with "getMovies" in lab 3
 		// Each pallet contains 15*10*36=5400 cookies
 		// Recipes are described for 100 cookies
 		// 54 recipes / pallet
-		
-		res.type("application/json");
 		
 		String palletID;
 		JSONObject jo = new JSONObject();
@@ -399,12 +399,12 @@ class Database {
 		
 		if (findCookie(req, res, cookie_name).equals("cookie not found")) {
 			jo.put("status", "no suck cookie");
-			return findCookie(req, res, cookie_name);
+			return jo.toString();
 		}
 		
 		if (compareIngredients(req, res, cookie_name).equals("error") || compareIngredients(req, res, cookie_name).equals("Not enough ingredients!")) {
 			jo.put("status", "not enough ingredients");
-			return compareIngredients(req, res, cookie_name);
+			return jo.toString();
 		}
 		
 		// If no returns above we insert a pallet
@@ -422,6 +422,7 @@ class Database {
 			
 		palletID = findPalletID (req, res);
 		
+		res.status(200);
 		jo.put("id", palletID);
 		jo.put("status", "ok");
 		return jo.toString();
@@ -500,6 +501,8 @@ class Database {
 		ArrayList<String> ingredients = new ArrayList<String>();
 		ArrayList<Integer> usedAmounts = new ArrayList<Integer>();
 		
+		// First we need to fetch values to insert in to 
+		// ingredients and usedAmounts
 		String queryGetUsedValues = 
 			"SELECT used_amount, ingredient, product_name\n" +
 		    "FROM used_materials\n" +
@@ -509,38 +512,40 @@ class Database {
 			ps.setString(1, cookie_name);
 			ResultSet rs = ps.executeQuery();
 			
-			while (true) {		
+			while (rs.next()) {		
 				ingredients.add(rs.getString(2));
 				usedAmounts.add(new Integer(rs.getInt(1)));
-				
-				if (!rs.next()) {
-					break;
-				}
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 			return "getValues failed";
 		}
 		
+		for (int i = 0; i < ingredients.size(); i++) {
+			System.out.println(ingredients.get(i));
+		}
+
 		System.out.println(usedAmounts.size());
 		
+		int index = 0;
+
+		// Then we update our list of materials based on fetched values
 		String queryUpdateMaterials = 
 			"UPDATE materials\n" + 
-		    "SET amount = amount - (? * 54)\n" +
+		    "SET amount = amount - ?\n" +
 			"WHERE ingredient = ?";
-		try (PreparedStatement ps = conn.prepareStatement(queryUpdateMaterials)) {
-			int index = 0;
-			while (index < usedAmounts.size()) {
-				ps.setInt(1, usedAmounts.get(index));
+		while (index < usedAmounts.size() && index < ingredients.size()) {
+			try (PreparedStatement ps = conn.prepareStatement(queryUpdateMaterials)) {
+				ps.setInt(1, usedAmounts.get(index) * 54);
 				ps.setString(2, ingredients.get(index));
 				ps.executeUpdate();
-				index++;
+			} catch (SQLException e) {
+				e.printStackTrace();
+				return "Update values failed!";
 			}
-			return "Cookie added!";
-		} catch (SQLException e) {
-			e.printStackTrace();
-			return "Update values failed!";
+			index++;
 		}
+		return "Cookie added!";
 	}
 	
 	private String findPalletID (Request req, Response res) {
