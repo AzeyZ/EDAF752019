@@ -398,7 +398,7 @@ class Database {
 		String cookie_name = req.queryParams("cookie");
 		
 		if (findCookie(req, res, cookie_name).equals("cookie not found")) {
-			jo.put("status", "no suck cookie");
+			jo.put("status", "no such cookie");
 			return jo.toString();
 		}
 		
@@ -414,7 +414,8 @@ class Database {
 		
 		// Find ingredients and how much are used for specified cookie
 		// Update values in materials
-		if (updateMaterials(req, res, cookie_name).equals("Update values failed!") || updateMaterials(req, res, cookie_name).equals("getValues failed"))
+		String result = updateMaterials(req, res, cookie_name);
+		if (result.equals("Update values failed!") || result.equals("getValues failed"))
 			return updateMaterials(req, res, cookie_name);
 		
 		if (findPalletID(req, res).equals("could not find pallet id"))
