@@ -25,7 +25,7 @@ public class App {
 		Database db = new Database("bakery.db");
 		port(8888); // Port 7007 in project 3
 		
-		get("/ping", (req, res) -> db.getPing(res)); // Used in lab3
+//		get("/ping", (req, res) -> db.getPing(res)); // Used in lab3
 		post("/reset", (req, res) -> db.resetTable(req, res));
 		get("/customers", (req, res)-> db.getCustomer(req, res));
 		get("/ingredients", (req, res) -> db.getIngredients(req, res));
