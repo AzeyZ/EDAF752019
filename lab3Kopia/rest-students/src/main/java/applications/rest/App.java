@@ -607,7 +607,7 @@ class Database {
 			}
 			
 			if(req.queryParams("blocked") != null) {
-				if(req.queryParams("blocked").equals("1")) {
+				if(req.queryParams("blocked").equals("true")) {
 					blocked = "1";
 				}
 				else
@@ -782,13 +782,13 @@ class JSONizer {
 				String label = meta.getColumnLabel(i);
 				String value = getValue(rs, i, meta.getColumnType(i));
 				if(value.contains("\"null")) {
-					sb.append("null");
+					sb.append("\"" + label + "\": " +  "null");
 				} else if(label.contains("blocked")) {
-					if(value.contains("\"0")) {
-						sb.append("true");
+					if(value.contains("\"1")) {
+						sb.append("\"" + label + "\": " + "true");
 					}
 					else {
-						sb.append("false");
+						sb.append("\"" + label + "\": " + "false");
 					}
 				}else{
 				sb.append("\"" + label + "\": " + value);
