@@ -220,8 +220,9 @@ class Database {
 		newUsedMaterial(50, "Chocolate", "Berliner", "g");
 	}
 	
+	// Removes all the data in all tables contained in the database
 	private void emptyDatabase() {
-		ArrayList<String> names = new ArrayList<>();
+		ArrayList<String> names = new ArrayList<>();	// List containing all the table names
 		names.add("products");
 		names.add("materials");
 		names.add("used_materials");
@@ -231,6 +232,7 @@ class Database {
 		names.add("customers");
 		names.add("orders");
 		
+		// Loop through the names of the lists and delete all their data
 		for (String name : names) {
 			String query = "DELETE FROM " + name;
 
@@ -243,6 +245,7 @@ class Database {
 		}
 	}
 	
+	// Adds a new customer with the specified name and address to the database
 	private boolean newCustomer(String name, String address) {
 		String queryCustomers = "INSERT INTO customers (customer_name, address)\n" + 
 			"VALUES  (?, ?)\n";
@@ -259,6 +262,7 @@ class Database {
 		}
 	}
 
+	// Adds a new product with the specified product name to the database
 	private boolean newProduct(String product_name) {
 		String queryProducts = "INSERT INTO products(product_name)\n" + 
 			"VALUES (?)";
@@ -273,6 +277,7 @@ class Database {
 		}
 	}
 
+	// Adds a new material with the specified ingredient name, amount and unit to the database
 	private boolean newMaterial(String ingredient, int amount, String unit) {
 		String queryMaterials = "INSERT INTO materials(ingredient, amount, unit)\n" + 
 			"VALUES (?, ?, ?)";
@@ -289,6 +294,8 @@ class Database {
 		}
 	}
 
+	// Adds a new used material (part of a recipe) with the specified
+	// used amount, ingredient name, product name and unit to the database
 	private boolean newUsedMaterial(int used_amount, String ingredient, String product_name, String unit) {
 		String queryUsedMaterials = "INSERT INTO used_materials(used_amount, ingredient, product_name, unit)\n" + 
 			"VALUES (?, ?, ?, ?)";
@@ -306,6 +313,7 @@ class Database {
 		}
 	}
 
+	// Gets all the customers stored in the database
 	public String getCustomer(Request req, Response res) {
 		res.type("application/json");
 		String query = "SELECT customer_name AS name, address \n"
@@ -323,6 +331,7 @@ class Database {
 		return "error";
 	}
 	
+	// Gets all the ingredients stored in the database
 	public String getIngredients(Request req, Response res) {
 		res.type("application/json");
 		String query = "SELECT ingredient AS name, amount AS quantity, unit\n"
@@ -341,6 +350,7 @@ class Database {
 		return "";
 	}
 	
+	// Gets all the cookies stored in the database
 	public String getCookies (Request req, Response res) {
 		res.type("application/json");
 		String query = "SELECT product_name AS name\n"
@@ -359,6 +369,8 @@ class Database {
 		return "";
 	}
 	
+	// Gets all the recipes, consisting of all the used materials
+	// for each cookie stored in the database
 	public String getRecipes (Request req, Response res) {
 		res.type("application/json");
 		String query = 
@@ -379,6 +391,8 @@ class Database {
 		return "error";
 	}
 	
+	// Adds a pallet to the database
+	// Takes a request parameter "cookie_name"
 	public String addPallet (Request req, Response res) {
 		res.type("application/json");
 		
@@ -389,7 +403,7 @@ class Database {
 		String palletID;
 		JSONObject jo = new JSONObject();
 		
-		String cookie_name = req.queryParams("cookie");
+		String cookie_name = req.queryParams("cookie");	// Fetches the request parameter
 		
 		if (findCookie(req, res, cookie_name).equals("cookie not found")) {
 			jo.put("status", "no such cookie");
@@ -423,6 +437,7 @@ class Database {
 		return jo.toString();
 	}
 	
+	// Determines if the addPallet request parameter is a valid cookie name
 	private String findCookie(Request req, Response res, String cookie_name) {
 		String queryFindCookie = "SELECT * FROM products WHERE product_name = ?";
 		try (PreparedStatement ps = conn.prepareStatement(queryFindCookie)) {
@@ -440,6 +455,7 @@ class Database {
 		}
 	}
 	
+	// Determines if the stored materials are enough to create a pallet of the specified cookie
 	private String compareIngredients (Request req, Response res, String cookie_name) {
 		int amount;
 		int used_amount;
@@ -473,6 +489,7 @@ class Database {
 		}
 	}
 	
+	// Inserts a pallet containing the specified cookie in to the database
 	private String insertPallet (Request req, Response res, String cookie_name) {
 		LocalDate date = LocalDate.now();
 		
@@ -492,6 +509,7 @@ class Database {
 		}
 	}
 	
+	// Removes the appropriate amount of each ingredient contained in the specified cookie
 	private String updateMaterials (Request req, Response res, String cookie_name) {
 		ArrayList<String> ingredients = new ArrayList<String>();
 		ArrayList<Integer> usedAmounts = new ArrayList<Integer>();
@@ -543,6 +561,7 @@ class Database {
 		return "Cookie added!";
 	}
 	
+	// Finds the pallet id of the last pallet inserted in to the database
 	private String findPalletID (Request req, Response res) {
 		String queryFindPallet = 
 			"SELECT pallet_id\n" +
@@ -561,19 +580,19 @@ class Database {
 		res.type("application/json");
 		
 		if(req.queryParams().size() == 0) {
-		String query = "SELECT pallet_id AS id, product_name AS cookie, production_date AS productionDate, customer_name AS customer, blocked\n"
-			+ "FROM pallets\n";
+			String query = "SELECT pallet_id AS id, product_name AS cookie, production_date AS productionDate, customer_name AS customer, blocked\n"
+				+ "FROM pallets\n";
 
-		try (PreparedStatement ps = conn.prepareStatement(query)) {
-			ResultSet rs = ps.executeQuery();
-			String result = JSONizer.toJSON(rs, "pallets");
-			res.status(200);
-			res.body(result);
-			return result;
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		return "";
+			try (PreparedStatement ps = conn.prepareStatement(query)) {
+				ResultSet rs = ps.executeQuery();
+				String result = JSONizer.toJSON(rs, "pallets");
+				res.status(200);
+				res.body(result);
+				return result;
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+			return "";
 		}
 		else {
 			String cookie_name = "";
