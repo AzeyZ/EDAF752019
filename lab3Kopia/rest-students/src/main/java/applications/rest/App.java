@@ -103,15 +103,10 @@ class Database {
 		return conn != null;
 	}
 
-	/* ================================== */
-	/* --- insert your own code below --- */
-	/* ===============================*== */
-
-	// From lab 3, might as well keep it?
-	public String getPing(Response res) {
-		res.status(200);
-		return "pong\n";
-	}
+//	public String getPing(Response res) {
+//		res.status(200);
+//		return "pong\n";
+//	}
 
 	public String resetTable(Request req, Response res) {
 
@@ -387,7 +382,6 @@ class Database {
 	public String addPallet (Request req, Response res) {
 		res.type("application/json");
 		
-		// Compare with "getMovies" in lab 3
 		// Each pallet contains 15*10*36=5400 cookies
 		// Recipes are described for 100 cookies
 		// 54 recipes / pallet
@@ -424,8 +418,8 @@ class Database {
 		palletID = findPalletID (req, res);
 		
 		res.status(200);
-		jo.put("id", palletID);
 		jo.put("status", "ok");
+		jo.put("id", palletID);
 		return jo.toString();
 	}
 	
@@ -656,13 +650,6 @@ class Database {
 		
 			try (PreparedStatement ps = conn.prepareStatement(query)) {
 				
-				System.out.println(cookieFirst + "cookieFirst");
-				System.out.println(blockedFirst + "blockedFirst");
-				System.out.println(afterFirst+ "afterFirst");
-				System.out.println(blockedSecond+ "blockedSecond");
-				System.out.println(afterSecond + "afterSecond");
-				System.out.println(afterThird+ "afterThird");
-				
 			if(req.queryParams().size() == 4) {
 				ps.setString(1, cookie_name);
 				ps.setString(2, blocked);
@@ -731,13 +718,18 @@ class Database {
 		String cookie_name = req.splat()[0];
 		String from_date = req.splat()[1];
 		String to_date = req.splat()[2];
-		String queryUpdate = "UPDATE pallets SET blocked = true WHERE product_name = ? AND production_date <= ? AND production_date >= ? ";
+		String queryUpdate = 
+		"UPDATE pallets \n" + 
+		"SET blocked = true \n" +
+		"WHERE product_name = ? AND production_date <= ? AND production_date >= ? ";
 			try (PreparedStatement ps = conn.prepareStatement(queryUpdate)) {
 				ps.setString(1, cookie_name);
 				ps.setString(2, to_date);
 				ps.setString(3, from_date);
 				ps.executeUpdate();
-				return "ok";
+				JSONObject jo = new JSONObject();
+        		jo.put("status", "ok");
+        		return jo.toJSONString();
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
@@ -749,13 +741,18 @@ class Database {
 		String cookie_name = req.splat()[0];
 		String from_date = req.splat()[1];
 		String to_date = req.splat()[2];
-		String queryUpdate = "UPDATE pallets SET blocked = false WHERE product_name = ? AND production_date <= ? AND production_date >= ? ";
+		String queryUpdate = 
+		"UPDATE pallets \n" + 
+		"SET blocked = false \n" +
+		"WHERE product_name = ? AND production_date <= ? AND production_date >= ? ";
 			try (PreparedStatement ps = conn.prepareStatement(queryUpdate)) {
 				ps.setString(1, cookie_name);
 				ps.setString(2, to_date);
 				ps.setString(3, from_date);
 				ps.executeUpdate();
-				return "ok";
+				JSONObject jo = new JSONObject();
+        		jo.put("status", "ok");
+        		return jo.toJSONString();
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
