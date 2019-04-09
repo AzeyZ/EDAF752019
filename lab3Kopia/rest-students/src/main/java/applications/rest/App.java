@@ -780,7 +780,19 @@ class JSONizer {
 			for (int i = 1; i <= meta.getColumnCount(); i++) {
 				String label = meta.getColumnLabel(i);
 				String value = getValue(rs, i, meta.getColumnType(i));
+				if(value.contains("\"null")) {
+					sb.append("null");
+				} else if(label.contains("blocked")) {
+					if(value.contains("\"0")) {
+						sb.append("true");
+					}
+					else {
+						sb.append("false");
+					}
+				}else{
 				sb.append("\"" + label + "\": " + value);
+				}
+				
 				if (i < meta.getColumnCount()) {
 					sb.append(", ");
 				}
