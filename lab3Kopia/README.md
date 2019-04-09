@@ -2,8 +2,8 @@
 
 This is the report for
 
- + Andreas Erlandsson, `stil_id`
- + Albin Olsson, `stil_id`
+ + Andreas Erlandsson, `stil-id`
+ + Albin Olsson, `al1100ol-s`
  + Martin Fredlund, `ma1233fr-s`
 
 We solved this project on our own, except for:
