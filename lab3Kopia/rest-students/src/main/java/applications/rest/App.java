@@ -696,10 +696,10 @@ class Database {
 				else {
 					query = query + "AND production_date < ? ";
 					if(blockedSecond) {
-						Blocks
+						afterThird = false;
 					}
 				}
-			}			Blocks
+			}			
 		
 			try (PreparedStatement ps = conn.prepareStatement(query)) {
 				
