@@ -13,10 +13,10 @@ We solved this project on our own, except for:
 
 ## ER-design
 
-The model is in the file [`er-model.png`](er-model.png):
+The model is in the file [`UML.png`](UML.png):
 
 <center>
-    <img src="er-model.png" width="100%">
+    <img src="UML.png" width="100%">
 </center>
 
 (The image above describes the model from lecture 4, you
@@ -50,27 +50,35 @@ are both primary keys and foreign keys):
 
 The scripts used to set up and populate the database are in:
 
- + [`create-schema.sql`](create-schema.sql) (defines the tables), and
+ + [`setup.sql`](setup.sql) (defines the tables)
+<!--, and
  + [`initial-data.sql`](initial-data.sql) (inserts data).
+-->
 
 So, to create and initialize the database, we run:
 
 ```shell
-sqlite3 krusty-db.sqlite < create-schema.sql
-sqlite3 krusty-db.sqlite < initial-data.sql
+sqlite3 bakery.db < create-schema.sql
 ```
+<!--
+sqlite3 krusty-db.sqlite < initial-data.sql
+-->
 
-(or whatever you call your database file).
 
 ## How to compile and run the program
 
+<!--
 This section should give a few simple commands to type to
 compile and run the program from the command line, such as:
+-->
+
+The only command we use to compile our program is:
 
 ```shell
 ./gradlew run
 ```
 
+<!--
 or
 
 ```shell
@@ -84,3 +92,4 @@ or, if you put your commands into a `Makefile`:
 make compile
 make run
 ```
+-->
