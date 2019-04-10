@@ -2,7 +2,7 @@
 
 This is the report for
 
- + Andreas Erlandsson, `stil-id`
+ + Andreas Erlandsson, `tna15aer`
  + Albin Olsson, `al1100ol-s`
  + Martin Fredlund, `ma1233fr-s`
 
