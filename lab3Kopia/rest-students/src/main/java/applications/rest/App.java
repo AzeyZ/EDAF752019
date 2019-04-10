@@ -560,12 +560,6 @@ class Database {
 			return "getValues failed";
 		}
 		
-		for (int i = 0; i < ingredients.size(); i++) {
-			System.out.println(ingredients.get(i));
-		}
-
-		System.out.println(usedAmounts.size());
-		
 		int index = 0;
 
 		// Then we update our list of materials based on fetched values
