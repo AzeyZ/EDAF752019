@@ -11,9 +11,6 @@ import org.json.simple.JSONObject;
 import spark.*;
 import static spark.Spark.*;
 import com.google.gson.Gson;
-//import com.sun.tools.internal.ws.processor.model.Request;
-//import com.sun.tools.internal.ws.processor.model.Response;
-
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.nio.charset.StandardCharsets;
@@ -23,9 +20,8 @@ public class App {
 
 	public static void main(String[] args) {
 		Database db = new Database("bakery.db");
-		port(8888); // Port 7007 in project 3
-		
-//		get("/ping", (req, res) -> db.getPing(res)); // Used in lab3
+		port(8888); 		
+
 		post("/reset", (req, res) -> db.resetTable(req, res));
 		get("/customers", (req, res)-> db.getCustomer(req, res));
 		get("/ingredients", (req, res) -> db.getIngredients(req, res));
@@ -36,14 +32,6 @@ public class App {
 		post("/block/*/*/*", (req, res) -> db.blockPallets(req, res));
 		post("/unblock/*/*/*", (req, res) -> db.unBlockPallets(req, res));
 
-		
-		// post("/performances", (req, res) -> db.addPerformance(req, res));
-		// post("/tickets", (req, res) -> db.addTicket(req, res));
-		
-		// get("/movies/:imdb-key", (req, res) -> db.getMovie(req, res,
-		// req.params(":imdb-key")));
-		// get("/customers/:username/tickets", (req, res) -> db.getCustomer(req, res,
-		// req.params(":username")));
 	}
 }
 
@@ -103,18 +91,21 @@ class Database {
 		return conn != null;
 	}
 
-//	public String getPing(Response res) {
-//		res.status(200);
-//		return "pong\n";
-//	}
-
+	/**
+	 * Reset and add start information to database
+	 * 
+	 * @param req 
+	 * @param res 
+	 * @return status response of the reset method as json 
+	 */
 	public String resetTable(Request req, Response res) {
 
 		res.type("application/json");
 
 		// Emptying all the tables
 		emptyDatabase();
-		
+
+		// Fill database with standard information
 		addCustomers();
 		addProducts();
 		addMaterials();
@@ -122,7 +113,6 @@ class Database {
 		
 		// Should return json object with "status" set to "ok"
 		res.status(200);
-		
 		JSONObject jo = new JSONObject();
         jo.put("status", "ok");
         return jo.toJSONString();
@@ -220,9 +210,10 @@ class Database {
 		newUsedMaterial(50, "Chocolate", "Berliner", "g");
 	}
 	
-	// Removes all the data in all tables contained in the database
+	//Reset database
 	private void emptyDatabase() {
-		ArrayList<String> names = new ArrayList<>();	// List containing all the table names
+		// List containing all the table names
+		ArrayList<String> names = new ArrayList<>();	
 		names.add("products");
 		names.add("materials");
 		names.add("used_materials");
@@ -247,8 +238,9 @@ class Database {
 	
 	// Adds a new customer with the specified name and address to the database
 	private boolean newCustomer(String name, String address) {
-		String queryCustomers = "INSERT INTO customers (customer_name, address)\n" + 
-			"VALUES  (?, ?)\n";
+		String queryCustomers = 
+			"INSERT INTO customers (customer_name, address)\n" + 
+			"VALUES  (?, ?)";
 
 		try {
 			PreparedStatement cust = conn.prepareStatement(queryCustomers);
@@ -264,7 +256,8 @@ class Database {
 
 	// Adds a new product with the specified product name to the database
 	private boolean newProduct(String product_name) {
-		String queryProducts = "INSERT INTO products(product_name)\n" + 
+		String queryProducts = 
+			"INSERT INTO products(product_name)\n" + 
 			"VALUES (?)";
 		try {
 			PreparedStatement product = conn.prepareStatement(queryProducts);
@@ -279,7 +272,8 @@ class Database {
 
 	// Adds a new material with the specified ingredient name, amount and unit to the database
 	private boolean newMaterial(String ingredient, int amount, String unit) {
-		String queryMaterials = "INSERT INTO materials(ingredient, amount, unit)\n" + 
+		String queryMaterials = 
+			"INSERT INTO materials(ingredient, amount, unit)\n" + 
 			"VALUES (?, ?, ?)";
 		try {
 			PreparedStatement material = conn.prepareStatement(queryMaterials);
@@ -294,10 +288,13 @@ class Database {
 		}
 	}
 
-	// Adds a new used material (part of a recipe) with the specified
-	// used amount, ingredient name, product name and unit to the database
+	/*
+	 Adds a new used material (part of a recipe) with the specified
+	 used amount, ingredient name, product name and unit to the database 
+	*/
 	private boolean newUsedMaterial(int used_amount, String ingredient, String product_name, String unit) {
-		String queryUsedMaterials = "INSERT INTO used_materials(used_amount, ingredient, product_name, unit)\n" + 
+		String queryUsedMaterials = 
+			"INSERT INTO used_materials(used_amount, ingredient, product_name, unit)\n" + 
 			"VALUES (?, ?, ?, ?)";
 		try {
 			PreparedStatement usedMaterial = conn.prepareStatement(queryUsedMaterials);
@@ -312,12 +309,18 @@ class Database {
 			return false;
 		}
 	}
-
-	// Gets all the customers stored in the database
+ 	/**
+	* Gets all the customers stored in the database
+	*  
+  	* @param req
+  	* @param res
+  	* @return status of the method as JSON object
+  	*/ 
 	public String getCustomer(Request req, Response res) {
 		res.type("application/json");
-		String query = "SELECT customer_name AS name, address \n"
-			+ "FROM customers ORDER BY customer_name";
+		String query = 
+			"SELECT customer_name AS name, address \n" + 
+			"FROM customers ORDER BY customer_name";
 
 		try (PreparedStatement ps = conn.prepareStatement(query)) {
 			ResultSet rs = ps.executeQuery();
@@ -330,12 +333,18 @@ class Database {
 		}
 		return "error";
 	}
-	
-	// Gets all the ingredients stored in the database
+	/**
+	 * Gets all the ingredients stored in the database
+	 * 
+	 * @param req
+	 * @param res
+	 * @return status of the method as JSON object
+	 */
 	public String getIngredients(Request req, Response res) {
 		res.type("application/json");
-		String query = "SELECT ingredient AS name, amount AS quantity, unit\n"
-			+ "FROM materials";
+		String query = 
+			"SELECT ingredient AS name, amount AS quantity, unit\n" +
+			"FROM materials";
 
 		try (PreparedStatement ps = conn.prepareStatement(query)) {
 			ResultSet rs = ps.executeQuery();
@@ -349,12 +358,18 @@ class Database {
 
 		return "";
 	}
-	
-	// Gets all the cookies stored in the database
+	/**
+	 * Gets all the cookies stored in the database
+	 * 
+	 * @param req
+	 * @param res
+	 * @return status of the method as JSON object
+	 */
 	public String getCookies (Request req, Response res) {
 		res.type("application/json");
-		String query = "SELECT product_name AS name\n"
-			+ "FROM products";
+		String query = 
+			"SELECT product_name AS name\n" + 
+			"FROM products";
 
 		try (PreparedStatement ps = conn.prepareStatement(query)) {
 			ResultSet rs = ps.executeQuery();
@@ -368,9 +383,14 @@ class Database {
 
 		return "";
 	}
-	
-	// Gets all the recipes, consisting of all the used materials
-	// for each cookie stored in the database
+	/**
+	 * Gets all the recipes, consisting of all the used materials
+	 * for each cookie stored in the database
+	 * 
+	 * @param req
+	 * @param res
+	 * @return status of the method as JSON object
+	 */
 	public String getRecipes (Request req, Response res) {
 		res.type("application/json");
 		String query = 
@@ -390,9 +410,13 @@ class Database {
 
 		return "error";
 	}
-	
-	// Adds a pallet to the database
-	// Takes a request parameter "cookie_name"
+	/**
+	 * Adds a pallet to the database
+	 * 
+	 * @param req cookie_name
+	 * @param res
+	 * @return status of the method as JSOn object
+	 */
 	public String addPallet (Request req, Response res) {
 		res.type("application/json");
 		
@@ -402,8 +426,8 @@ class Database {
 		
 		String palletID;
 		JSONObject jo = new JSONObject();
-		
-		String cookie_name = req.queryParams("cookie");	// Fetches the request parameter
+		// Fetches the request parameter
+		String cookie_name = req.queryParams("cookie");	
 		
 		if (findCookie(req, res, cookie_name).equals("cookie not found")) {
 			jo.put("status", "no such cookie");
@@ -439,7 +463,10 @@ class Database {
 	
 	// Determines if the addPallet request parameter is a valid cookie name
 	private String findCookie(Request req, Response res, String cookie_name) {
-		String queryFindCookie = "SELECT * FROM products WHERE product_name = ?";
+		String queryFindCookie = 
+			"SELECT *\n" +
+			"FROM products\n" +
+			"WHERE product_name = ?";
 		try (PreparedStatement ps = conn.prepareStatement(queryFindCookie)) {
 			ps.setString(1,  cookie_name);
 			ResultSet rs = ps.executeQuery();
@@ -575,13 +602,21 @@ class Database {
 			return "could not find pallet id";
 		}
 	}
-	
+
+	/**
+	 * Get a specific pallet from the database
+	 * 
+	 * @param req
+	 * @param res
+	 * @return 
+	 */
 	public String getPallets(Request req, Response res) {
 		res.type("application/json");
 		
 		if(req.queryParams().size() == 0) {
-			String query = "SELECT pallet_id AS id, product_name AS cookie, production_date AS productionDate, customer_name AS customer, blocked\n"
-				+ "FROM pallets\n";
+			String query = 
+				"SELECT pallet_id AS id, product_name AS cookie, production_date AS productionDate, customer_name AS customer, blocked\n" + 
+				"FROM pallets";
 
 			try (PreparedStatement ps = conn.prepareStatement(query)) {
 				ResultSet rs = ps.executeQuery();
@@ -608,10 +643,10 @@ class Database {
 			boolean afterSecond = false;
 			boolean afterThird = false;
 			
-			String query = "SELECT pallet_id AS id, product_name AS cookie, production_date AS productionDate, customer_name AS customer, blocked\n"
-					+ "FROM pallets\n";
+			String query = 
+				"SELECT pallet_id AS id, product_name AS cookie, production_date AS productionDate, customer_name AS customer, blocked\n" + 
+				"FROM pallets\n";
 
-			
 			if(req.queryParams("cookie") != null) {
 				cookie_name = req.queryParams("cookie");
 				query = query + " WHERE product_name = ? ";
@@ -731,7 +766,12 @@ class Database {
 	}
 		return "";
 	}
-	
+	/**
+	 * 
+	 * @param req
+	 * @param res
+	 * @return
+	 */
 	public String blockPallets(Request req, Response res) {
 		res.type("application/json");
 		String cookie_name = req.splat()[0];
@@ -754,7 +794,12 @@ class Database {
 			}
 			return "error";
 		}
-	
+	/**
+	 * 
+	 * @param req
+	 * @param res
+	 * @return
+	 */
 	public String unBlockPallets(Request req, Response res) {
 		res.type("application/json");
 		String cookie_name = req.splat()[0];
